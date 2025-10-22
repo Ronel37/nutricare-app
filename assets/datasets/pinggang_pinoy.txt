@@ -1,0 +1,133 @@
+Dataset: Pinggang Pinoy
+
+Pregnant Women
+
+Sex: Not specified
+
+Go (Rice & Alternatives): Any of the following: 1 & 1/2 cup of cooked rice, 6 pieces of small pandesal, 6 slices of small loaf bread, 1 & 1/2 cup of cooked noodles (ex. Pansit), 1 & 1/2 medium piece of root crop (ex. kamote)
+
+Grow (Fish & Alternatives): Any of the following: 2 piece (small size) medium variety of fish (ex. Galunggong), 3 slice of large variety of fish (ex. Bangus), 2 pieces of medium chicken leg, 3 serving of lean meat 30g each (ex. Chicken, pork, beef), 3 piece tokwa 6 × 6 × 2 cm each, 1 piece small chicken egg and 1-2 piece of any food items mentioned above
+
+Glow (Vegetables): 1-1 & 1/2 cups of cooked vegetables (ex. Malunggay, saluyot, gabi leaves, talinum, ampalaya, kalabasa, carrots, sitaw)
+
+Glow (Fruits): Any of the following: 1 medium size fruit (ex. Saging, dalanghita, mangga), 1 slice of big fruit (ex. Papaya, pinya, pakwan)
+
+Lactating Women
+
+Sex: Not specified
+
+Go (Rice & Alternatives): Any of the following: 1 & 1/2 cup of cooked rice, 6 pieces of small pandesal, 6 slices of small loaf bread, 1 & 1/2 cup of cooked noodles (ex. Pansit), 1 & 1/2 medium piece of root crop (ex. kamote)
+
+Grow (Fish & Alternatives): Any of the following: 2 piece (small size) medium variety of fish (ex. Galunggong), 3 slice of large variety of fish (ex. Bangus), 2 pieces of medium chicken leg, 3 serving of lean meat 30g each (ex. Chicken, pork, beef), 3 piece tokwa 6 × 6 × 2 cm each, 1 piece small chicken egg and 1-2 piece of any food items mentioned above
+
+Glow (Vegetables): 1-1 & 1/2 cups of cooked vegetables (ex. Malunggay, saluyot, gabi leaves, talinum, ampalaya, kalabasa, carrots, sitaw)
+
+Glow (Fruits): Any of the following: 1 medium size fruit (ex. Saging, dalanghita, mangga), 1 slice of big fruit (ex. Papaya, pinya, pakwan)
+
+3-5 years (Kids)
+
+Sex: Male & Female
+
+Go (Rice & Alternatives): Any of the following: 1/2 cup of cooked rice, 2 pieces of small pandesal, 2 slices of small loaf bread, 1/2 cup of cooked noodles (ex. Pansit), 1/2 medium piece of root crop (ex. kamote)
+
+Grow (Fish & Alternatives): Any of the following: 1/2 piece (small size) medium variety of fish (ex. Galunggong), 1/2 slice of large variety of fish (ex. Bangus), 1/2 serving of lean meat 15g (ex. Chicken, pork, beef), 1/2 piece tokwa, 1/2 piece small chicken egg
+
+Glow (Vegetables): 1/2 cups of cooked vegetables (ex. Malunggay, saluyot, gabi leaves, talinum, ampalaya, kalabasa, carrots, sitaw)
+
+Glow (Fruits): Any of the following: 1/2 -1 medium size fruit (ex. Saging, dalanghita, mangga), 1/2 - 1 slice of big fruit (ex. Papaya, pinya, pakwan)
+
+6-9 years (Kids)
+
+Sex: Male & Female
+
+Go (Rice & Alternatives): Any of the following: 3/4 cup of cooked rice, 3 pieces of small pandesal, 3 slices of small loaf bread, 3/4 cup of cooked noodles (ex. Pansit), 3/4 medium piece of root crop (ex. kamote)
+
+Grow (Fish & Alternatives): Any of the following: 1/2 piece (small size) medium variety of fish (ex. Galunggong), 1/2 slice of large variety of fish (ex. Bangus), 1/2 serving of lean meat 15g (ex. Chicken, pork, beef), 1/2 piece tokwa, 1/2 piece small chicken egg
+
+Glow (Vegetables): 3/4 cups of cooked vegetables (ex. Malunggay, saluyot, gabi leaves, talinum, ampalaya, kalabasa, carrots, sitaw)
+
+Glow (Fruits): Any of the following: 1 medium size fruit (ex. Saging, dalanghita, mangga), 1 slice of big fruit (ex. Papaya, pinya, pakwan)
+
+10-12 years (Kids)
+
+Sex: Male & Female
+
+Go (Rice & Alternatives): Any of the following: 1 cup of cooked rice, 4 pieces of small pandesal, 4 slices of small loaf bread, 1 cup of cooked noodles (ex. Pansit), 1 medium piece of root crop (ex. kamote)
+
+Grow (Fish & Alternatives): Any of the following: 1 piece (small size) medium variety of fish (ex. Galunggong), 1 slice of large variety of fish (ex. Bangus), 1 serving of lean meat 30g (ex. Chicken, pork, beef), 1 piece tokwa 6 × 6 × 2 cm, 1 piece small chicken egg
+
+Glow (Vegetables): 3/4 - 1 cups of cooked vegetables (ex. Malunggay, saluyot, gabi leaves, talinum, ampalaya, kalabasa, carrots, sitaw)
+
+Glow (Fruits): Any of the following: 1 medium size fruit (ex. Saging, dalanghita, mangga), 1 slice of big fruit (ex. Papaya, pinya, pakwan)
+
+13-18 years (Teens) - Male
+
+Sex: Male
+
+Go (Rice & Alternatives): Any of the following: 2 cup of cooked rice, 8 pieces of small pandesal, 8 slices of small loaf bread, 2 cup of cooked noodles (ex. Pansit), 2 medium piece of root crop (ex. kamote)
+
+Grow (Fish & Alternatives): Any of the following: 2 piece (small size) medium variety of fish (ex. Galunggong), 2 slice of large variety of fish (ex. Bangus), 2 pieces of chicken leg, 2 serving of lean meat 30g (ex. Chicken, pork, beef), 2 piece tokwa 6 × 6 × 2 cm, 1 piece small chicken egg and 1 piece of any food items mentioned above
+
+Glow (Vegetables): 1-2 cups of cooked vegetables (ex. Malunggay, saluyot, gabi leaves, talinum, ampalaya, kalabasa, carrots, sitaw)
+
+Glow (Fruits): Any of the following: 1 medium size fruit (ex. Saging, dalanghita, mangga), 1 slice of big fruit (ex. Papaya, pinya, pakwan)
+
+13-18 years (Teens) - Female
+
+Sex: Female
+
+Go (Rice & Alternatives): Any of the following: 1 & 1/2 cup of cooked rice, 6 pieces of small pandesal, 6 slices of small loaf bread, 1 & 1/2 cup of cooked noodles (ex. Pansit), 1 & 1/2 medium piece of root crop (ex. kamote)
+
+Grow (Fish & Alternatives): Any of the following: 1 piece (small size) medium variety of fish (ex. Galunggong), 1 slice of large variety of fish (ex. Bangus), 1 piece of chicken leg, 1 serving of lean meat 30g (ex. Chicken, pork, beef), 1 piece tokwa 6 × 6 × 2 cm, 1 piece small chicken egg
+
+Glow (Vegetables): 1-1 & 1/2 cups of cooked vegetables (ex. Malunggay, saluyot, gabi leaves, talinum, ampalaya, kalabasa, carrots, sitaw)
+
+Glow (Fruits): Any of the following: 1 medium size fruit (ex. Saging, dalanghita, mangga), 1 slice of big fruit (ex. Papaya, pinya, pakwan)
+
+19-59 years (Adults) - Male
+
+Sex: Male
+
+Go (Rice & Alternatives): Any of the following: 1 & 1/2 cup of cooked rice, 6 pieces of small pandesal, 6 slices of small loaf bread, 1 & 1/2 cup of cooked noodles (ex. Pansit), 1 & 1/2 medium piece of root crop (ex. kamote)
+
+Grow (Fish & Alternatives): Any of the following: 2 piece (small size) medium variety of fish (ex. Galunggong), 2 slice of large variety of fish (ex. Bangus), 2 pieces of chicken leg, 2 serving of lean meat 30g each (ex. Chicken, pork, beef), 2 piece tokwa 6 × 6 × 2 cm each, 1 piece small chicken egg and 1 piece of any food items mentioned above
+
+Glow (Vegetables): 1-1 & 1/2 cups of cooked vegetables (ex. Malunggay, saluyot, gabi leaves, talinum, ampalaya, kalabasa, carrots, sitaw)
+
+Glow (Fruits): Any of the following: 1 medium size fruit (ex. Saging, dalanghita, mangga), 1 slice of big fruit (ex. Papaya, pinya, pakwan)
+
+19-59 years (Adults) - Female
+
+Sex: Female
+
+Go (Rice & Alternatives): Any of the following: 1 & 1/2 cup of cooked rice, 4 pieces of small pandesal, 4 slices of small loaf bread, 1 cup of cooked noodles (ex. Pansit), 1 medium piece of root crop (ex. kamote)
+
+Grow (Fish & Alternatives): Any of the following: 2 piece (small size) medium variety of fish (ex. Galunggong), 2 slice of large variety of fish (ex. Bangus), 2 pieces of chicken leg, 2 serving of lean meat 30g each (ex. Chicken, pork, beef), 2 piece tokwa 6 × 6 × 2 cm each, 1 piece small chicken egg and 1 piece of any food items mentioned above
+
+Glow (Vegetables): 3/4 - 1 cups of cooked vegetables (ex. Malunggay, saluyot, gabi leaves, talinum, ampalaya, kalabasa, carrots, sitaw)
+
+Glow (Fruits): Any of the following: 1 medium size fruit (ex. Saging, dalanghita, mangga), 1 slice of big fruit (ex. Papaya, pinya, pakwan)
+
+60 years old and above - Male
+
+Sex: Male
+
+Go (Rice & Alternatives): Any of the following: 1 cup of cooked rice, 4 pieces of small pandesal, 4 slices of small loaf bread, 1 cup of cooked noodles (ex. Pansit), 1 medium piece of root crop (ex. kamote)
+
+Grow (Fish & Alternatives): Any of the following: 2 piece (small size) medium variety of fish (ex. Galunggong), 2 slice of large variety of fish (ex. Bangus), 2 pieces of chicken leg, 2 serving of lean meat 30g each (ex. Chicken, pork, beef), 2 piece tokwa 6 × 6 × 2 cm each, 1 piece small chicken egg and 1 piece of any food items mentioned above
+
+Glow (Vegetables): 3/4 - 1 cups of cooked vegetables (ex. Malunggay, saluyot, gabi leaves, talinum, ampalaya, kalabasa, carrots, sitaw)
+
+Glow (Fruits): Any of the following: 1 medium size fruit (ex. Saging, dalanghita, mangga), 1 slice of big fruit (ex. Papaya, pinya, pakwan)
+
+61 years old and above - Female
+
+Sex: Female
+
+Go (Rice & Alternatives): Any of the following: 3/4 cup of cooked rice, 3 pieces of small pandesal, 3 slices of small loaf bread, 3/4 cup of cooked noodles (ex. Pansit), 3/4 medium piece of root crop (ex. kamote)
+
+Grow (Fish & Alternatives): Any of the following: 2 piece (small size) medium variety of fish (ex. Galunggong), 2 slice of large variety of fish (ex. Bangus), 2 pieces of chicken leg, 2 serving of lean meat 30g each (ex. Chicken, pork, beef), 2 piece tokwa 6 × 6 × 2 cm each, 1 piece small chicken egg and 1 piece of any food items mentioned above
+
+Glow (Vegetables): 3/4 cups of cooked vegetables (ex. Malunggay, saluyot, gabi leaves, talinum, ampalaya, kalabasa, carrots, sitaw)
+
+Glow (Fruits): Any of the following: 1 medium size fruit (ex. Saging, dalanghita, mangga), 1 slice of big fruit (ex. Papaya, pinya, pakwan)
