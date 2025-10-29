@@ -873,6 +873,16 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
       ...moderateCounts,
       ...normalCounts,
     ].fold<int>(0, (p, c) => c > p ? c : p);
+    // Calculate a nice rounded maxY with headroom so bars never exceed chart
+    double _niceMaxY(int v) {
+      if (v <= 0) return 10;
+      // Choose step based on magnitude
+      int step;
+      if (v <= 10) step = 2; else if (v <= 25) step = 5; else if (v <= 100) step = 10; else step = 20;
+      final rounded = ((v + step) / step).ceil() * step; // round up and add headroom
+      return rounded.toDouble();
+    }
+    final double maxYDisplay = _niceMaxY(maxY);
 
     return Container(
       padding: EdgeInsets.all(20),
@@ -905,7 +915,9 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
             height: 260,
             child: BarChart(
               BarChartData(
-                maxY: (maxY > 0 ? (maxY * 1.3) : 10).toDouble(),
+                minY: 0,
+                maxY: maxYDisplay,
+                alignment: BarChartAlignment.spaceAround,
                 gridData: FlGridData(show: true, drawVerticalLine: false,
                   getDrawingHorizontalLine: (value) => FlLine(color: Colors.grey[800]!.withOpacity(0.3), strokeWidth: 0.5),
                 ),
@@ -950,6 +962,8 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
                   touchTooltipData: BarTouchTooltipData(
                     tooltipRoundedRadius: 8,
                     tooltipPadding: EdgeInsets.all(10),
+                    fitInsideHorizontally: true,
+                    fitInsideVertically: true,
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       final label = metrics[group.x.toInt()];
                       return BarTooltipItem(
@@ -1293,12 +1307,14 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
         color: primaryColor,
       );
       
+      // ignore: unused_local_variable
       final headerStyle = pw.TextStyle(
         fontSize: 16,
         fontWeight: pw.FontWeight.bold,
         color: primaryColor,
       );
       
+      // ignore: unused_local_variable
       final normalStyle = pw.TextStyle(fontSize: 12, color: PdfColors.black);
       
       pdf.addPage(
