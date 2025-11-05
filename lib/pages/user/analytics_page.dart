@@ -431,18 +431,19 @@ class _SeparatedCharts extends StatelessWidget {
                           isUnderFive: isUnderFive,
                         ),
                       ),
-                      SizedBox(
-                        width: cardWidth,
-                        height: cardHeight,
-                        child: _buildChartCard(
-                          title: 'BMI',
-                          unit: 'kg/m²',
-                          icon: Icons.fitness_center,
-                          color: Colors.pinkAccent,
-                          series: bmiSeries,
-                          isUnderFive: isUnderFive,
+                      if (!isUnderFive)
+                        SizedBox(
+                          width: cardWidth,
+                          height: cardHeight,
+                          child: _buildChartCard(
+                            title: 'BMI',
+                            unit: 'kg/m²',
+                            icon: Icons.fitness_center,
+                            color: Colors.pinkAccent,
+                            series: bmiSeries,
+                            isUnderFive: isUnderFive,
+                          ),
                         ),
-                      ),
                       if (isUnderFive)
                         SizedBox(
                           width: cardWidth,

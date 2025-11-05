@@ -12,10 +12,11 @@ class MonthlyBmiProgressPage extends StatefulWidget {
   State<MonthlyBmiProgressPage> createState() => _MonthlyBmiProgressPageState();
 }
 
-class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with TickerProviderStateMixin {
+class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
+    with TickerProviderStateMixin {
   final CollectionReference usersCollection =
       FirebaseFirestore.instance.collection('users');
-  
+
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   String _selectedTimeRange = '6months';
@@ -46,7 +47,6 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
     _animationController.dispose();
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +149,8 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
                 return FutureBuilder<Map<String, dynamic>>(
                   future: _fetchOverallAnalytics(usersData),
                   builder: (context, analyticsSnapshot) {
-                    if (analyticsSnapshot.connectionState == ConnectionState.waiting) {
+                    if (analyticsSnapshot.connectionState ==
+                        ConnectionState.waiting) {
                       return _buildLoadingState();
                     }
 
@@ -277,8 +278,6 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
     );
   }
 
-
-
   Widget _buildExportButton() {
     return Container(
       decoration: BoxDecoration(
@@ -392,6 +391,7 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
           SizedBox(height: 32),
           _buildMainChart(analyticsData),
           SizedBox(height: 32),
+          // Weekly progress section removed as requested
           _buildAtRiskTable(analyticsData),
           SizedBox(height: 32),
           _buildUserInsights(analyticsData),
@@ -479,11 +479,14 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
           SizedBox(height: 24),
           Row(
             children: [
-              _buildHeaderStat("Total Users", totalUsers.toString(), Icons.people),
+              _buildHeaderStat(
+                  "Total Users", totalUsers.toString(), Icons.people),
               SizedBox(width: 24),
-              _buildHeaderStat("Total Records", totalPersons.toString(), Icons.person),
+              _buildHeaderStat(
+                  "Total Records", totalPersons.toString(), Icons.person),
               SizedBox(width: 24),
-              _buildHeaderStat("Last Updated", DateFormat('MMM dd').format(lastUpdated), Icons.update),
+              _buildHeaderStat("Last Updated",
+                  DateFormat('MMM dd').format(lastUpdated), Icons.update),
             ],
           ),
         ],
@@ -540,9 +543,11 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
           child: _buildStatCard(
             "BMI Distribution",
             [
-              _buildStatItem("Underweight", bmiStats['underweight'] ?? 0, Colors.blue),
+              _buildStatItem(
+                  "Underweight", bmiStats['underweight'] ?? 0, Colors.blue),
               _buildStatItem("Normal", bmiStats['normal'] ?? 0, Colors.green),
-              _buildStatItem("Overweight", bmiStats['overweight'] ?? 0, Colors.orange),
+              _buildStatItem(
+                  "Overweight", bmiStats['overweight'] ?? 0, Colors.orange),
               _buildStatItem("Obese", bmiStats['obese'] ?? 0, Colors.red),
             ],
             Icons.pie_chart,
@@ -554,8 +559,10 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
           child: _buildStatCard(
             "Growth Metrics",
             [
-              _buildStatItem("Children (≤5)", growthStats['children'] ?? 0, Colors.purple),
-              _buildStatItem("Adults (>5)", growthStats['adults'] ?? 0, Colors.teal),
+              _buildStatItem(
+                  "Children (≤5)", growthStats['children'] ?? 0, Colors.purple),
+              _buildStatItem(
+                  "Adults (>5)", growthStats['adults'] ?? 0, Colors.teal),
             ],
             Icons.trending_up,
             Colors.green,
@@ -565,7 +572,8 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
     );
   }
 
-  Widget _buildStatCard(String title, List<Widget> items, IconData icon, Color color) {
+  Widget _buildStatCard(
+      String title, List<Widget> items, IconData icon, Color color) {
     return Container(
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -719,7 +727,8 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
     final overweight = bmiStats['overweight'] ?? 0;
     final obese = bmiStats['obese'] ?? 0;
 
-    final maxValue = [underweight, normal, overweight, obese].reduce((a, b) => a > b ? a : b);
+    final maxValue = [underweight, normal, overweight, obese]
+        .reduce((a, b) => a > b ? a : b);
 
     return BarChart(
       BarChartData(
@@ -729,9 +738,14 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
             tooltipRoundedRadius: 8,
             tooltipPadding: EdgeInsets.all(12),
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
-              final categories = ['Underweight', 'Normal', 'Overweight', 'Obese'];
+              final categories = [
+                'Underweight',
+                'Normal',
+                'Overweight',
+                'Obese'
+              ];
               final values = [underweight, normal, overweight, obese];
-              
+
               return BarTooltipItem(
                 '${categories[groupIndex]}\n${values[groupIndex]} users',
                 TextStyle(
@@ -765,7 +779,12 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
               showTitles: true,
               reservedSize: 30,
               getTitlesWidget: (value, meta) {
-                final categories = ['Underweight', 'Normal', 'Overweight', 'Obese'];
+                final categories = [
+                  'Underweight',
+                  'Normal',
+                  'Overweight',
+                  'Obese'
+                ];
                 return Text(
                   categories[value.toInt()],
                   style: TextStyle(
@@ -858,15 +877,31 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
   }
 
   Widget _buildMalnutritionOverview(Map<String, dynamic> analyticsData) {
-    final mal = analyticsData['malnutritionStats'] as Map<String, dynamic>? ?? {};
-    final haz = (mal['haz'] as Map<String, dynamic>? ?? {}).map((k, v) => MapEntry(k, (v as num).toInt()));
-    final waz = (mal['waz'] as Map<String, dynamic>? ?? {}).map((k, v) => MapEntry(k, (v as num).toInt()));
-    final whz = (mal['whz'] as Map<String, dynamic>? ?? {}).map((k, v) => MapEntry(k, (v as num).toInt()));
+    final mal =
+        analyticsData['malnutritionStats'] as Map<String, dynamic>? ?? {};
+    final haz = (mal['haz'] as Map<String, dynamic>? ?? {})
+        .map((k, v) => MapEntry(k, (v as num).toInt()));
+    final waz = (mal['waz'] as Map<String, dynamic>? ?? {})
+        .map((k, v) => MapEntry(k, (v as num).toInt()));
+    final whz = (mal['whz'] as Map<String, dynamic>? ?? {})
+        .map((k, v) => MapEntry(k, (v as num).toInt()));
 
     final metrics = ['HAZ', 'WAZ', 'WHZ'];
-    final severeCounts = [haz['severe'] ?? 0, waz['severe'] ?? 0, whz['severe'] ?? 0];
-    final moderateCounts = [haz['moderate'] ?? 0, waz['moderate'] ?? 0, whz['moderate'] ?? 0];
-    final normalCounts = [haz['normal'] ?? 0, waz['normal'] ?? 0, whz['normal'] ?? 0];
+    final severeCounts = [
+      haz['severe'] ?? 0,
+      waz['severe'] ?? 0,
+      whz['severe'] ?? 0
+    ];
+    final moderateCounts = [
+      haz['moderate'] ?? 0,
+      waz['moderate'] ?? 0,
+      whz['moderate'] ?? 0
+    ];
+    final normalCounts = [
+      haz['normal'] ?? 0,
+      waz['normal'] ?? 0,
+      whz['normal'] ?? 0
+    ];
 
     final maxY = [
       ...severeCounts,
@@ -878,10 +913,19 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
       if (v <= 0) return 10;
       // Choose step based on magnitude
       int step;
-      if (v <= 10) step = 2; else if (v <= 25) step = 5; else if (v <= 100) step = 10; else step = 20;
-      final rounded = ((v + step) / step).ceil() * step; // round up and add headroom
+      if (v <= 10)
+        step = 2;
+      else if (v <= 25)
+        step = 5;
+      else if (v <= 100)
+        step = 10;
+      else
+        step = 20;
+      final rounded =
+          ((v + step) / step).ceil() * step; // round up and add headroom
       return rounded.toDouble();
     }
+
     final double maxYDisplay = _niceMaxY(maxY);
 
     return Container(
@@ -900,7 +944,10 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
               SizedBox(width: 8),
               Text(
                 "Malnutrition (≤5 yrs) — HAZ/WAZ/WHZ",
-                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold),
               ),
               Spacer(),
               _legendDot(Colors.redAccent, 'Severe'),
@@ -918,39 +965,68 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
                 minY: 0,
                 maxY: maxYDisplay,
                 alignment: BarChartAlignment.spaceAround,
-                gridData: FlGridData(show: true, drawVerticalLine: false,
-                  getDrawingHorizontalLine: (value) => FlLine(color: Colors.grey[800]!.withOpacity(0.3), strokeWidth: 0.5),
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  getDrawingHorizontalLine: (value) => FlLine(
+                      color: Colors.grey[800]!.withOpacity(0.3),
+                      strokeWidth: 0.5),
                 ),
                 titlesData: FlTitlesData(
-                  leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40,
-                    getTitlesWidget: (value, meta) => Text(value.toInt().toString(), style: TextStyle(color: Colors.white70, fontSize: 12)),
+                  leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 40,
+                    getTitlesWidget: (value, meta) => Text(
+                        value.toInt().toString(),
+                        style: TextStyle(color: Colors.white70, fontSize: 12)),
                   )),
-                  bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 28,
+                  bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 28,
                     getTitlesWidget: (value, meta) {
                       final i = value.toInt();
                       if (i >= 0 && i < metrics.length) {
-                        return Text(metrics[i], style: TextStyle(color: Colors.white70, fontSize: 12));
+                        return Text(metrics[i],
+                            style:
+                                TextStyle(color: Colors.white70, fontSize: 12));
                       }
                       return const SizedBox.shrink();
                     },
                   )),
-                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles:
+                      AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles:
+                      AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 ),
-                borderData: FlBorderData(show: true, border: Border.all(color: Colors.grey[700]!, width: 1)),
+                borderData: FlBorderData(
+                    show: true,
+                    border: Border.all(color: Colors.grey[700]!, width: 1)),
                 barGroups: List.generate(3, (i) {
-                  final total = (severeCounts[i] + moderateCounts[i] + normalCounts[i]).toDouble();
+                  final total =
+                      (severeCounts[i] + moderateCounts[i] + normalCounts[i])
+                          .toDouble();
                   return BarChartGroupData(
                     x: i,
                     barRods: [
                       BarChartRodData(
                         toY: total,
                         width: 36,
-                        borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)),
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(8),
+                            topRight: Radius.circular(8)),
                         rodStackItems: [
-                          BarChartRodStackItem(0, severeCounts[i].toDouble(), Colors.redAccent),
-                          BarChartRodStackItem(severeCounts[i].toDouble(), (severeCounts[i] + moderateCounts[i]).toDouble(), Colors.orangeAccent),
-                          BarChartRodStackItem((severeCounts[i] + moderateCounts[i]).toDouble(), total, Colors.greenAccent),
+                          BarChartRodStackItem(
+                              0, severeCounts[i].toDouble(), Colors.redAccent),
+                          BarChartRodStackItem(
+                              severeCounts[i].toDouble(),
+                              (severeCounts[i] + moderateCounts[i]).toDouble(),
+                              Colors.orangeAccent),
+                          BarChartRodStackItem(
+                              (severeCounts[i] + moderateCounts[i]).toDouble(),
+                              total,
+                              Colors.greenAccent),
                         ],
                         color: Colors.transparent,
                       ),
@@ -968,7 +1044,10 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
                       final label = metrics[group.x.toInt()];
                       return BarTooltipItem(
                         '$label\nSevere: ${severeCounts[group.x.toInt()]}\nModerate: ${moderateCounts[group.x.toInt()]}\nNormal: ${normalCounts[group.x.toInt()]}',
-                        TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                        TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600),
                       );
                     },
                   ),
@@ -985,12 +1064,16 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         SizedBox(width: 6),
         Text(text, style: TextStyle(color: Colors.white70, fontSize: 12)),
       ],
     );
   }
+
   Widget _buildAtRiskTable(Map<String, dynamic> analyticsData) {
     final atRisk = (analyticsData['atRisk'] as List<dynamic>? ?? [])
         .cast<Map<String, dynamic>>();
@@ -1010,7 +1093,11 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
           Row(children: [
             Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 20),
             SizedBox(width: 8),
-            Text('At-Risk Individuals', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('At-Risk Individuals',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold)),
             Spacer(),
             if (allAtRisk.length > 5)
               Container(
@@ -1022,7 +1109,10 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
                 ),
                 child: Text(
                   '${allAtRisk.length} total',
-                  style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                      color: Colors.blue,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500),
                 ),
               ),
             SizedBox(width: 8),
@@ -1034,13 +1124,16 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
           ]),
           SizedBox(height: 12),
           if (atRisk.isEmpty)
-            Text('No at-risk individuals found', style: TextStyle(color: Colors.white70))
+            Text('No at-risk individuals found',
+                style: TextStyle(color: Colors.white70))
           else ...[
             // Show limited records (top 5)
             SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: Column(
-                children: atRisk.map((person) => _buildPersonRiskCard(person)).toList(),
+                children: atRisk
+                    .map((person) => _buildPersonRiskCard(person))
+                    .toList(),
               ),
             ),
             if (allAtRisk.length > 5) ...[
@@ -1049,12 +1142,14 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
                 child: ElevatedButton.icon(
                   onPressed: () => _showAllAtRiskDialog(allAtRisk),
                   icon: Icon(Icons.visibility, size: 16),
-                  label: Text('View All ${allAtRisk.length} At-Risk Individuals'),
+                  label:
+                      Text('View All ${allAtRisk.length} At-Risk Individuals'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue[700],
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
                   ),
                 ),
               ),
@@ -1071,12 +1166,12 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
     final String sex = ((person['sex'] ?? '-').toString()).toUpperCase();
     final DateTime? updated = person['updatedAt'] as DateTime?;
     final bool isChild = person['isChild'] == true;
-    
+
     // Collect all risks for this person
     List<Map<String, dynamic>> risks = [];
-    
-    // BMI risk
-    if (person['bmiRisk'] != null) {
+
+    // BMI risk (exclude for children ≤5)
+    if (!isChild && person['bmiRisk'] != null) {
       risks.add({
         'type': 'BMI',
         'value': person['bmi'],
@@ -1084,7 +1179,7 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
         'color': _getRiskColor(person['bmiRisk']),
       });
     }
-    
+
     // Anthropometric risks for children ≤5 years
     if (isChild) {
       if (person['hazRisk'] != null) {
@@ -1131,11 +1226,19 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(name, style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text(name,
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold)),
                     SizedBox(height: 4),
-                    Text('Age: $age • Sex: $sex', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                    Text('Age: $age • Sex: $sex',
+                        style: TextStyle(color: Colors.white70, fontSize: 12)),
                     if (updated != null)
-                      Text('Updated: ${DateFormat('MMM d, yyyy').format(updated)}', style: TextStyle(color: Colors.white54, fontSize: 11)),
+                      Text(
+                          'Updated: ${DateFormat('MMM d, yyyy').format(updated)}',
+                          style:
+                              TextStyle(color: Colors.white54, fontSize: 11)),
                   ],
                 ),
               ),
@@ -1151,8 +1254,10 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0A3D00),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
               ),
             ],
@@ -1162,50 +1267,56 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: risks.map((risk) => Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: risk['color'].withOpacity(0.15),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: risk['color'].withOpacity(0.4)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    risk['risk'].toString().contains('Severe') ? Icons.error : Icons.warning,
-                    color: risk['color'],
-                    size: 14,
-                  ),
-                  SizedBox(width: 6),
-                  Text(
-                    '${risk['type']}: ',
-                    style: TextStyle(
-                      color: risk['color'].withOpacity(0.85),
-                      fontWeight: FontWeight.w500,
-                      fontSize: 12,
-                    ),
-                  ),
-                  Text(
-                    '${risk['value'] is num ? risk['value'].toStringAsFixed(risk['type'] == 'BMI' ? 1 : 2) : '-'}',
-                    style: TextStyle(
-                      color: risk['color'],
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12,
-                    ),
-                  ),
-                  SizedBox(width: 4),
-                  Text(
-                    risk['risk'],
-                    style: TextStyle(
-                      color: risk['color'],
-                      fontWeight: FontWeight.w600,
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
-            )).toList(),
+            children: risks
+                .map((risk) => Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: risk['color'].withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(20),
+                        border:
+                            Border.all(color: risk['color'].withOpacity(0.4)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            risk['risk'].toString().contains('Severe')
+                                ? Icons.error
+                                : Icons.warning,
+                            color: risk['color'],
+                            size: 14,
+                          ),
+                          SizedBox(width: 6),
+                          Text(
+                            '${risk['type']}: ',
+                            style: TextStyle(
+                              color: risk['color'].withOpacity(0.85),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12,
+                            ),
+                          ),
+                          Text(
+                            '${risk['value'] is num ? risk['value'].toStringAsFixed(risk['type'] == 'BMI' ? 1 : 2) : '-'}',
+                            style: TextStyle(
+                              color: risk['color'],
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12,
+                            ),
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            risk['risk'],
+                            style: TextStyle(
+                              color: risk['color'],
+                              fontWeight: FontWeight.w600,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ))
+                .toList(),
           ),
         ],
       ),
@@ -1215,7 +1326,10 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
   Color _getRiskColor(String? risk) {
     if (risk == null) return Colors.grey;
     if (risk.contains('Severe')) return Colors.redAccent;
-    if (risk.contains('Moderate') || risk.contains('Stunting') || risk.contains('Underweight') || risk.contains('Wasting')) return Colors.orangeAccent;
+    if (risk.contains('Moderate') ||
+        risk.contains('Stunting') ||
+        risk.contains('Underweight') ||
+        risk.contains('Wasting')) return Colors.orangeAccent;
     return Colors.amber;
   }
 
@@ -1225,7 +1339,8 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
       builder: (BuildContext context) {
         return Dialog(
           backgroundColor: Colors.grey[900],
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Container(
             width: MediaQuery.of(context).size.width * 0.9,
             height: MediaQuery.of(context).size.height * 0.8,
@@ -1235,11 +1350,15 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
               children: [
                 Row(
                   children: [
-                    Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 24),
+                    Icon(Icons.warning_amber_rounded,
+                        color: Colors.amber, size: 24),
                     SizedBox(width: 12),
                     Text(
                       'All At-Risk Individuals (${allAtRisk.length})',
-                      style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
                     ),
                     Spacer(),
                     IconButton(
@@ -1252,7 +1371,9 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(
-                      children: allAtRisk.map((person) => _buildPersonRiskCard(person)).toList(),
+                      children: allAtRisk
+                          .map((person) => _buildPersonRiskCard(person))
+                          .toList(),
                     ),
                   ),
                 ),
@@ -1267,8 +1388,10 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF0A3D00),
                         foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
                       ),
                     ),
                     SizedBox(width: 12),
@@ -1277,8 +1400,10 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey[700],
                         foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
                       ),
                       child: Text('Close'),
                     ),
@@ -1295,28 +1420,28 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
   Future<void> _generateAtRiskPDF(List<Map<String, dynamic>> atRiskData) async {
     try {
       final pdf = pw.Document();
-      
+
       // Colors
       final primaryColor = PdfColor.fromInt(0xFF0A3D00);
       final gray = PdfColors.grey600;
-      
+
       // Styles
       final titleStyle = pw.TextStyle(
         fontSize: 24,
         fontWeight: pw.FontWeight.bold,
         color: primaryColor,
       );
-      
+
       // ignore: unused_local_variable
       final headerStyle = pw.TextStyle(
         fontSize: 16,
         fontWeight: pw.FontWeight.bold,
         color: primaryColor,
       );
-      
+
       // ignore: unused_local_variable
       final normalStyle = pw.TextStyle(fontSize: 12, color: PdfColors.black);
-      
+
       pdf.addPage(
         pw.MultiPage(
           pageFormat: PdfPageFormat.a4,
@@ -1336,39 +1461,44 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
                 style: pw.TextStyle(fontSize: 10, color: gray),
               ),
               pw.SizedBox(height: 20),
-              
+
               // At-Risk Individuals
               ...atRiskData.map((person) {
                 final String name = person['name'] ?? '-';
                 final String age = (person['age'] ?? '-').toString();
-                final String sex = ((person['sex'] ?? '-').toString()).toUpperCase();
+                final String sex =
+                    ((person['sex'] ?? '-').toString()).toUpperCase();
                 final bool isChild = person['isChild'] == true;
-                
+
                 // Collect all risks for this person
                 List<String> riskEntries = [];
-                
-                // BMI risk
-                if (person['bmiRisk'] != null) {
+
+                // BMI risk (exclude for children ≤5)
+                if (!isChild && person['bmiRisk'] != null) {
                   final bmi = person['bmi'] as num?;
-                  riskEntries.add('BMI: ${bmi?.toStringAsFixed(1) ?? '-'} (${person['bmiRisk']})');
+                  riskEntries.add(
+                      'BMI: ${bmi?.toStringAsFixed(1) ?? '-'} (${person['bmiRisk']})');
                 }
-                
+
                 // Anthropometric risks for children ≤5 years
                 if (isChild) {
                   if (person['hazRisk'] != null) {
                     final haz = person['haz'] as num?;
-                    riskEntries.add('HAZ: ${haz?.toStringAsFixed(2) ?? '-'} (${person['hazRisk']})');
+                    riskEntries.add(
+                        'HAZ: ${haz?.toStringAsFixed(2) ?? '-'} (${person['hazRisk']})');
                   }
                   if (person['wazRisk'] != null) {
                     final waz = person['waz'] as num?;
-                    riskEntries.add('WAZ: ${waz?.toStringAsFixed(2) ?? '-'} (${person['wazRisk']})');
+                    riskEntries.add(
+                        'WAZ: ${waz?.toStringAsFixed(2) ?? '-'} (${person['wazRisk']})');
                   }
                   if (person['whzRisk'] != null) {
                     final whz = person['whz'] as num?;
-                    riskEntries.add('WHZ: ${whz?.toStringAsFixed(2) ?? '-'} (${person['whzRisk']})');
+                    riskEntries.add(
+                        'WHZ: ${whz?.toStringAsFixed(2) ?? '-'} (${person['whzRisk']})');
                   }
                 }
-                
+
                 return pw.Container(
                   margin: pw.EdgeInsets.only(bottom: 16),
                   padding: pw.EdgeInsets.all(12),
@@ -1381,17 +1511,25 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
                     children: [
                       pw.Row(
                         children: [
-                          pw.Text(name, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14)),
+                          pw.Text(name,
+                              style: pw.TextStyle(
+                                  fontWeight: pw.FontWeight.bold,
+                                  fontSize: 14)),
                           pw.SizedBox(width: 8),
-                          pw.Text('Age: $age', style: pw.TextStyle(fontSize: 10, color: gray)),
+                          pw.Text('Age: $age',
+                              style: pw.TextStyle(fontSize: 10, color: gray)),
                           pw.SizedBox(width: 8),
-                          pw.Text('Sex: $sex', style: pw.TextStyle(fontSize: 10, color: gray)),
+                          pw.Text('Sex: $sex',
+                              style: pw.TextStyle(fontSize: 10, color: gray)),
                         ],
                       ),
                       pw.SizedBox(height: 4),
-                      pw.Text('Risk Metrics:', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+                      pw.Text('Risk Metrics:',
+                          style: pw.TextStyle(
+                              fontSize: 10, fontWeight: pw.FontWeight.bold)),
                       pw.SizedBox(height: 2),
-                      pw.Text(riskEntries.join(' • '), style: pw.TextStyle(fontSize: 9, color: gray)),
+                      pw.Text(riskEntries.join(' • '),
+                          style: pw.TextStyle(fontSize: 9, color: gray)),
                     ],
                   ),
                 );
@@ -1400,10 +1538,11 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
           },
         ),
       );
-      
+
       await Printing.layoutPdf(
         onLayout: (PdfPageFormat format) async => pdf.save(),
-        name: 'At_Risk_Individuals_${DateFormat('yyyyMMdd_HHmm').format(DateTime.now())}.pdf',
+        name:
+            'At_Risk_Individuals_${DateFormat('yyyyMMdd_HHmm').format(DateTime.now())}.pdf',
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1415,11 +1554,18 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
   Widget _riskBadge(String label, Color color) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(20), border: Border.all(color: color.withOpacity(0.4))),
+      decoration: BoxDecoration(
+          color: color.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withOpacity(0.4))),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         SizedBox(width: 6),
-        Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w600)),
+        Text(label,
+            style: TextStyle(color: color, fontWeight: FontWeight.w600)),
       ]),
     );
   }
@@ -1428,8 +1574,10 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(color: color.withOpacity(0.6), fontSize: 10)),
-        Text(value, style: TextStyle(color: color, fontWeight: FontWeight.w600)),
+        Text(label,
+            style: TextStyle(color: color.withOpacity(0.6), fontSize: 10)),
+        Text(value,
+            style: TextStyle(color: color, fontWeight: FontWeight.w600)),
       ],
     );
   }
@@ -1492,7 +1640,8 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
     );
   }
 
-  Widget _buildInsightItem(String title, String description, IconData icon, Color color) {
+  Widget _buildInsightItem(
+      String title, String description, IconData icon, Color color) {
     return Padding(
       padding: EdgeInsets.only(bottom: 16),
       child: Row(
@@ -1533,7 +1682,8 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
     );
   }
 
-  Future<Map<String, dynamic>> _fetchOverallAnalytics(List<QueryDocumentSnapshot> usersData) async {
+  Future<Map<String, dynamic>> _fetchOverallAnalytics(
+      List<QueryDocumentSnapshot> usersData) async {
     try {
       int totalUsers = usersData.length;
       int totalPersons = 0;
@@ -1555,12 +1705,18 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
       Map<String, int> whzStats = {'severe': 0, 'moderate': 0, 'normal': 0};
       // monthly BMI trend
       Map<String, List<double>> monthToBmis = {};
+      // weekly trends
+      Map<DateTime, List<double>> weekToBmis = {};
+      Map<DateTime, List<double>> weekToHaz = {};
+      Map<DateTime, List<double>> weekToWaz = {};
+      Map<DateTime, List<double>> weekToWhz = {};
       // at-risk individuals (top 20) - grouped by person
       List<Map<String, dynamic>> atRisk = [];
       Map<String, Map<String, dynamic>> personRiskMap = {};
 
       // Fetch all persons per user in parallel
-      final List<Future<QuerySnapshot>> personFutures = usersData.map((userDoc) {
+      final List<Future<QuerySnapshot>> personFutures =
+          usersData.map((userDoc) {
         final userId = userDoc.id;
         return FirebaseFirestore.instance
             .collection('users')
@@ -1569,11 +1725,12 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
             .get();
       }).toList();
 
-      final List<QuerySnapshot> personSnapshots = await Future.wait(personFutures);
+      final List<QuerySnapshot> personSnapshots =
+          await Future.wait(personFutures);
 
       for (final personSnapshot in personSnapshots) {
         totalPersons += personSnapshot.docs.length;
-        
+
         for (var personDoc in personSnapshot.docs) {
           final person = personDoc.data() as Map<String, dynamic>;
           final dynamic bmiRaw = person['bmi'];
@@ -1587,34 +1744,50 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
           final String? sexVal = (person['sex'] as String?)?.toLowerCase();
           final String first = (person['firstname'] ?? '').toString();
           final String last = (person['lastname'] ?? '').toString();
-          final String name = (first + ' ' + last).trim().isEmpty ? (person['name'] ?? 'Person') : (first + ' ' + last).trim();
+          final String name = (first + ' ' + last).trim().isEmpty
+              ? (person['name'] ?? 'Person')
+              : (first + ' ' + last).trim();
           final DateTime? ts = _parseTimestamp(person['timestamp']);
           final String personId = personDoc.id;
-          final String ownerUserId = personSnapshot.docs.first.reference.parent.parent!.id;
+          final String ownerUserId =
+              personSnapshot.docs.first.reference.parent.parent!.id;
 
           // Apply filters
           bool passesSex = _filterSex == 'all' || (sexVal == _filterSex);
-          bool passesAge = _filterAgeGroup == 'all' || (_filterAgeGroup == 'children' ? (age ?? 99) <= 5 : (age ?? 0) > 5);
+          bool passesAge = _filterAgeGroup == 'all' ||
+              (_filterAgeGroup == 'children'
+                  ? (age ?? 99) <= 5
+                  : (age ?? 0) > 5);
           if (!passesSex || !passesAge) {
             continue;
           }
 
           if (bmi != null) {
-            if (bmi < 18.5) {
-              bmiStats['underweight'] = bmiStats['underweight']! + 1;
-            } else if (bmi < 25) {
-              bmiStats['normal'] = bmiStats['normal']! + 1;
-            } else if (bmi < 30) {
-              bmiStats['overweight'] = bmiStats['overweight']! + 1;
-            } else {
-              bmiStats['obese'] = bmiStats['obese']! + 1;
+            // Exclude BMI of 5 years old and below from category distribution
+            if ((age ?? 0) > 5) {
+              if (bmi < 18.5) {
+                bmiStats['underweight'] = bmiStats['underweight']! + 1;
+              } else if (bmi < 25) {
+                bmiStats['normal'] = bmiStats['normal']! + 1;
+              } else if (bmi < 30) {
+                bmiStats['overweight'] = bmiStats['overweight']! + 1;
+              } else {
+                bmiStats['obese'] = bmiStats['obese']! + 1;
+              }
             }
             // At-risk determination by BMI
             String? bmiRisk;
-            if (bmi < 16) bmiRisk = 'Severely Underweight';
-            else if (bmi < 18.5) bmiRisk = 'Underweight';
+            if (bmi < 16)
+              bmiRisk = 'Severely Underweight';
+            else if (bmi < 18.5)
+              bmiRisk = 'Underweight';
             else if (bmi >= 30) bmiRisk = 'Obese';
-            
+            // Do not include BMI-based risk for children (≤5 years)
+            final bool isChildBmi = (age ?? 99) <= 5;
+            if (isChildBmi) {
+              bmiRisk = null;
+            }
+
             // Initialize person risk entry if not exists
             if (!personRiskMap.containsKey(personId)) {
               personRiskMap[personId] = {
@@ -1624,7 +1797,7 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
                 'updatedAt': ts,
                 'userId': ownerUserId,
                 'personId': personId,
-                'bmi': bmi,
+                'bmi': isChildBmi ? null : bmi,
                 'bmiRisk': bmiRisk,
                 'haz': null,
                 'hazRisk': null,
@@ -1635,13 +1808,20 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
                 'isChild': (age ?? 99) <= 5,
               };
             } else {
-              personRiskMap[personId]!['bmi'] = bmi;
+              if (!isChildBmi) {
+                personRiskMap[personId]!['bmi'] = bmi;
+              } else {
+                personRiskMap[personId]!['bmi'] = null;
+              }
               personRiskMap[personId]!['bmiRisk'] = bmiRisk;
             }
             // Monthly BMI trend
             if (ts != null) {
               final monthKey = DateFormat('MMMM yyyy').format(ts);
               monthToBmis.putIfAbsent(monthKey, () => []).add(bmi);
+              // Weekly BMI trend (all ages)
+              final weekStart = _weekStart(ts);
+              weekToBmis.putIfAbsent(weekStart, () => []).add(bmi);
             }
           }
 
@@ -1659,14 +1839,18 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
           // Malnutrition stats for children only
           if ((age ?? 99) <= 5) {
             if (haz != null) {
-              if (haz < -3) hazStats['severe'] = hazStats['severe']! + 1;
-              else if (haz < -2) hazStats['moderate'] = hazStats['moderate']! + 1;
-              else hazStats['normal'] = hazStats['normal']! + 1;
+              if (haz < -3)
+                hazStats['severe'] = hazStats['severe']! + 1;
+              else if (haz < -2)
+                hazStats['moderate'] = hazStats['moderate']! + 1;
+              else
+                hazStats['normal'] = hazStats['normal']! + 1;
               // At-risk for HAZ
               String? hzRisk;
-              if (haz < -3) hzRisk = 'Severe Stunting (HAZ)';
+              if (haz < -3)
+                hzRisk = 'Severe Stunting (HAZ)';
               else if (haz < -2) hzRisk = 'Stunting (HAZ)';
-              
+
               // Update person risk entry with HAZ data
               if (!personRiskMap.containsKey(personId)) {
                 personRiskMap[personId] = {
@@ -1690,15 +1874,23 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
                 personRiskMap[personId]!['haz'] = haz;
                 personRiskMap[personId]!['hazRisk'] = hzRisk;
               }
+              if (ts != null) {
+                final weekStart = _weekStart(ts);
+                weekToHaz.putIfAbsent(weekStart, () => []).add(haz);
+              }
             }
             if (waz != null) {
-              if (waz < -3) wazStats['severe'] = wazStats['severe']! + 1;
-              else if (waz < -2) wazStats['moderate'] = wazStats['moderate']! + 1;
-              else wazStats['normal'] = wazStats['normal']! + 1;
+              if (waz < -3)
+                wazStats['severe'] = wazStats['severe']! + 1;
+              else if (waz < -2)
+                wazStats['moderate'] = wazStats['moderate']! + 1;
+              else
+                wazStats['normal'] = wazStats['normal']! + 1;
               String? wzRisk;
-              if (waz < -3) wzRisk = 'Severe Underweight (WAZ)';
+              if (waz < -3)
+                wzRisk = 'Severe Underweight (WAZ)';
               else if (waz < -2) wzRisk = 'Underweight (WAZ)';
-              
+
               // Update person risk entry with WAZ data
               if (!personRiskMap.containsKey(personId)) {
                 personRiskMap[personId] = {
@@ -1722,15 +1914,23 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
                 personRiskMap[personId]!['waz'] = waz;
                 personRiskMap[personId]!['wazRisk'] = wzRisk;
               }
+              if (ts != null) {
+                final weekStart = _weekStart(ts);
+                weekToWaz.putIfAbsent(weekStart, () => []).add(waz);
+              }
             }
             if (whz != null) {
-              if (whz < -3) whzStats['severe'] = whzStats['severe']! + 1;
-              else if (whz < -2) whzStats['moderate'] = whzStats['moderate']! + 1;
-              else whzStats['normal'] = whzStats['normal']! + 1;
+              if (whz < -3)
+                whzStats['severe'] = whzStats['severe']! + 1;
+              else if (whz < -2)
+                whzStats['moderate'] = whzStats['moderate']! + 1;
+              else
+                whzStats['normal'] = whzStats['normal']! + 1;
               String? whzRisk;
-              if (whz < -3) whzRisk = 'Severe Wasting (WHZ)';
+              if (whz < -3)
+                whzRisk = 'Severe Wasting (WHZ)';
               else if (whz < -2) whzRisk = 'Wasting (WHZ)';
-              
+
               // Update person risk entry with WHZ data
               if (!personRiskMap.containsKey(personId)) {
                 personRiskMap[personId] = {
@@ -1754,6 +1954,10 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
                 personRiskMap[personId]!['whz'] = whz;
                 personRiskMap[personId]!['whzRisk'] = whzRisk;
               }
+              if (ts != null) {
+                final weekStart = _weekStart(ts);
+                weekToWhz.putIfAbsent(weekStart, () => []).add(whz);
+              }
             }
           }
         }
@@ -1761,50 +1965,88 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
 
       // Sort monthly trend chronologically
       final months = monthToBmis.keys.toList()
-        ..sort((a, b) => DateFormat('MMMM yyyy').parse(a).compareTo(DateFormat('MMMM yyyy').parse(b)));
+        ..sort((a, b) => DateFormat('MMMM yyyy')
+            .parse(a)
+            .compareTo(DateFormat('MMMM yyyy').parse(b)));
       final monthlyTrend = months.map((m) {
         final list = monthToBmis[m]!;
         final avg = list.reduce((a, b) => a + b) / list.length;
         return {'month': m, 'avgBmi': avg};
       }).toList();
 
+      // Build weekly trends sorted by week start date
+      List<DateTime> weekKeys = weekToBmis.keys.toList()
+        ..sort((a, b) => a.compareTo(b));
+      // Limit to last 12 weeks for readability
+      if (weekKeys.length > 12) {
+        weekKeys = weekKeys.sublist(weekKeys.length - 12);
+      }
+      final weeklyBmiTrend = weekKeys.map((wk) {
+        final bmis = weekToBmis[wk] ?? [];
+        final count = bmis.length;
+        return {
+          'week': DateFormat('yyyy-MM-dd').format(wk),
+          'count': count,
+        };
+      }).toList();
+
+      final weeklyPediatricZTrends = weekKeys.map((wk) {
+        return {
+          'week': DateFormat('yyyy-MM-dd').format(wk),
+          'hazCount': (weekToHaz[wk] ?? []).length,
+          'wazCount': (weekToWaz[wk] ?? []).length,
+          'whzCount': (weekToWhz[wk] ?? []).length,
+        };
+      }).toList();
+
       // Convert personRiskMap to atRisk list, filtering for people with any risk
       atRisk = personRiskMap.values.where((person) {
-        return person['bmiRisk'] != null || 
-               person['hazRisk'] != null || 
-               person['wazRisk'] != null || 
-               person['whzRisk'] != null;
+        return person['bmiRisk'] != null ||
+            person['hazRisk'] != null ||
+            person['wazRisk'] != null ||
+            person['whzRisk'] != null;
       }).toList();
-      
+
       // Sort at-risk list by risk severity and limit to top 5 for lightweight display
       atRisk.sort((a, b) {
         // Calculate risk score for sorting
         double getRiskScore(Map<String, dynamic> person) {
           double score = 0;
-          // BMI risk scoring
-          final bmi = person['bmi'] as num?;
-          if (bmi != null) {
-            if (bmi < 16) score += 10; // Severely underweight
-            else if (bmi < 18.5) score += 5; // Underweight
-            else if (bmi >= 30) score += 8; // Obese
+          // BMI risk scoring (adults only)
+          if (person['isChild'] != true) {
+            final bmi = person['bmi'] as num?;
+            if (bmi != null) {
+              if (bmi < 16)
+                score += 10; // Severely underweight
+              else if (bmi < 18.5)
+                score += 5; // Underweight
+              else if (bmi >= 30) score += 8; // Obese
+            }
           }
           // Z-score risk scoring (for children ≤5)
           if (person['isChild'] == true) {
-            if (person['hazRisk']?.toString().contains('Severe') == true) score += 8;
-            else if (person['hazRisk']?.toString().contains('Stunting') == true) score += 4;
-            if (person['wazRisk']?.toString().contains('Severe') == true) score += 8;
-            else if (person['wazRisk']?.toString().contains('Underweight') == true) score += 4;
-            if (person['whzRisk']?.toString().contains('Severe') == true) score += 8;
-            else if (person['whzRisk']?.toString().contains('Wasting') == true) score += 4;
+            if (person['hazRisk']?.toString().contains('Severe') == true)
+              score += 8;
+            else if (person['hazRisk']?.toString().contains('Stunting') == true)
+              score += 4;
+            if (person['wazRisk']?.toString().contains('Severe') == true)
+              score += 8;
+            else if (person['wazRisk']?.toString().contains('Underweight') ==
+                true) score += 4;
+            if (person['whzRisk']?.toString().contains('Severe') == true)
+              score += 8;
+            else if (person['whzRisk']?.toString().contains('Wasting') == true)
+              score += 4;
           }
           return score;
         }
+
         return getRiskScore(b).compareTo(getRiskScore(a));
       });
-      
+
       // Store all at-risk individuals for "View All" functionality
       final allAtRisk = List<Map<String, dynamic>>.from(atRisk);
-      
+
       // Limit to top 5 for lightweight display
       if (atRisk.length > 5) atRisk = atRisk.sublist(0, 5);
 
@@ -1814,8 +2056,12 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
         'bmiStats': bmiStats,
         'growthStats': {
           ...growthStats,
-          'avgHeight': heights.isNotEmpty ? heights.reduce((a, b) => a + b) / heights.length : 0,
-          'avgWeight': weights.isNotEmpty ? weights.reduce((a, b) => a + b) / weights.length : 0,
+          'avgHeight': heights.isNotEmpty
+              ? heights.reduce((a, b) => a + b) / heights.length
+              : 0,
+          'avgWeight': weights.isNotEmpty
+              ? weights.reduce((a, b) => a + b) / weights.length
+              : 0,
         },
         'malnutritionStats': {
           'haz': hazStats,
@@ -1823,8 +2069,11 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
           'whz': whzStats,
         },
         'monthlyBmiTrend': monthlyTrend,
+        'weeklyBmiTrend': weeklyBmiTrend,
+        'weeklyPediatricZTrends': weeklyPediatricZTrends,
         'atRisk': atRisk,
-        'allAtRisk': allAtRisk, // Store all at-risk individuals for "View All" functionality
+        'allAtRisk':
+            allAtRisk, // Store all at-risk individuals for "View All" functionality
       };
     } catch (e) {
       print('Error fetching overall analytics: $e');
@@ -1832,356 +2081,757 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage> with Ti
     }
   }
 
-  double? _toDouble(dynamic value) {
-    if (value == null) return null;
-    if (value is num) return value.toDouble();
-    if (value is String) return double.tryParse(value);
-    return null;
+  // Returns Monday (00:00) of the week for the given date
+  DateTime _weekStart(DateTime d) {
+    final local = DateTime(d.year, d.month, d.day);
+    final int weekday = local.weekday; // Monday=1 ... Sunday=7
+    final monday = local.subtract(Duration(days: weekday - 1));
+    return DateTime(monday.year, monday.month, monday.day);
   }
 
-  Future<void> _generateProfessionalReport(BuildContext context, Map<String, dynamic> analyticsData) async {
-    try {
-      final pdf = pw.Document();
-
-      // Colors and styles
-      final primary = PdfColor.fromInt(0xFF0A3D00);
-      final gray = PdfColors.grey700;
-      final titleStyle = pw.TextStyle(fontSize: 22, fontWeight: pw.FontWeight.bold, color: PdfColors.black);
-      final sectionTitle = pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.black);
-      final labelStyle = pw.TextStyle(fontSize: 10, color: gray);
-      final valueStyle = pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold);
-
-      // Extract data
-      final int totalUsers = (analyticsData['totalUsers'] ?? 0) as int;
-      final int totalPersons = (analyticsData['totalPersons'] ?? 0) as int;
-      final Map<String, dynamic> bmiStats = (analyticsData['bmiStats'] as Map<String, dynamic>? ?? {});
-      final Map<String, dynamic> mal = (analyticsData['malnutritionStats'] as Map<String, dynamic>? ?? {});
-      final Map<String, dynamic> haz = (mal['haz'] as Map<String, dynamic>? ?? {});
-      final Map<String, dynamic> waz = (mal['waz'] as Map<String, dynamic>? ?? {});
-      final Map<String, dynamic> whz = (mal['whz'] as Map<String, dynamic>? ?? {});
-      final List<dynamic> atRisk = (analyticsData['atRisk'] as List<dynamic>? ?? []);
-
-      // Helper KPI widget
-      pw.Widget kpiTile(String label, String value) {
-        return pw.Container(
-          padding: const pw.EdgeInsets.all(10),
-          decoration: pw.BoxDecoration(
-            border: pw.Border.all(color: PdfColors.grey300, width: 1),
-            borderRadius: pw.BorderRadius.circular(8),
+  Widget _buildWeeklyProgressSection(Map<String, dynamic> analyticsData) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.timeline, color: Colors.lightBlueAccent, size: 20),
+            SizedBox(width: 8),
+            Text(
+              'Weekly Progress — BMI and Pediatric Z-scores',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        SizedBox(height: 16),
+        // BMI Weekly Chart
+        Container(
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.grey[900],
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey[800]!),
           ),
-          child: pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              pw.Text(label, style: labelStyle),
-              pw.SizedBox(height: 4),
-              pw.Text(value, style: valueStyle),
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                        color: Colors.pinkAccent.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8)),
+                    child: Icon(Icons.fitness_center,
+                        color: Colors.pinkAccent, size: 20),
+                  ),
+                  SizedBox(width: 12),
+                  Text('BMI Weekly Average',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold)),
+                ],
+              ),
+              SizedBox(height: 16),
+              SizedBox(
+                  height: 240, child: _buildWeeklyBmiBarChart(analyticsData)),
             ],
           ),
-        );
-      }
+        ),
+        SizedBox(height: 16),
+        // Pediatric Z-score Weekly Chart
+        Container(
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.grey[900],
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey[800]!),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                        color: Colors.teal.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8)),
+                    child: Icon(Icons.child_care,
+                        color: Colors.tealAccent, size: 20),
+                  ),
+                  SizedBox(width: 12),
+                  Text('Pediatric Z-scores Weekly (≤5 yrs)',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold)),
+                ],
+              ),
+              SizedBox(height: 16),
+              SizedBox(
+                  height: 260, child: _buildWeeklyZBarChart(analyticsData)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 
-      // Header
-      final now = DateTime.now();
-      pdf.addPage(
-        pw.MultiPage(
-          pageFormat: PdfPageFormat.a4,
-          margin: const pw.EdgeInsets.all(24),
-          header: (ctx) => pw.Container(
-            padding: const pw.EdgeInsets.only(bottom: 8),
-            decoration: pw.BoxDecoration(
-              border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey300, width: 1)),
-            ),
-            child: pw.Row(
-              crossAxisAlignment: pw.CrossAxisAlignment.center,
-              children: [
-                pw.Container(
-                  width: 10,
-                  height: 28,
-                  decoration: pw.BoxDecoration(color: primary, borderRadius: pw.BorderRadius.circular(4)),
-                ),
-                pw.SizedBox(width: 10),
-                pw.Text('Professional Analytics Report', style: titleStyle),
-                pw.Spacer(),
-                pw.Text(DateFormat('dd MMM yyyy, HH:mm').format(now), style: pw.TextStyle(color: gray, fontSize: 10)),
-              ],
+  Widget _buildWeeklyBmiBarChart(Map<String, dynamic> analyticsData) {
+    final List<dynamic> rows =
+        (analyticsData['weeklyBmiTrend'] as List<dynamic>? ?? []);
+    if (rows.isEmpty) {
+      return Center(
+          child: Text('No weekly BMI data',
+              style: TextStyle(color: Colors.white70)));
+    }
+    final weeks = rows.map((e) => e['week'] as String).toList();
+    final values =
+        rows.map((e) => ((e['count'] as num?)?.toDouble() ?? 0.0)).toList();
+
+    final maxValue = values.fold<double>(0, (p, c) => c > p ? c : p);
+
+    return BarChart(
+      BarChartData(
+        maxY: (maxValue > 0 ? maxValue : 10) * 1.2,
+        barTouchData: BarTouchData(
+          touchTooltipData: BarTouchTooltipData(
+            tooltipRoundedRadius: 8,
+            tooltipPadding: EdgeInsets.all(10),
+            getTooltipItem: (group, groupIndex, rod, rodIndex) {
+              return BarTooltipItem(
+                '${weeks[groupIndex]}\n${rod.toY.toInt()} records',
+                TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600),
+              );
+            },
+          ),
+        ),
+        titlesData: FlTitlesData(
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 40,
+              getTitlesWidget: (value, meta) => Text(value.toInt().toString(),
+                  style: TextStyle(color: Colors.white70, fontSize: 12)),
             ),
           ),
-          build: (ctx) => [
-            // Summary KPIs
-            pw.SizedBox(height: 12),
-            pw.Row(
-              children: [
-                pw.Expanded(child: kpiTile('Total Users', totalUsers.toString())),
-                pw.SizedBox(width: 12),
-                pw.Expanded(child: kpiTile('Total Records', totalPersons.toString())),
-              ],
-            ),
-
-            pw.SizedBox(height: 18),
-            // BMI Distribution Table
-            pw.Text('BMI Distribution', style: sectionTitle),
-            pw.SizedBox(height: 8),
-            pw.TableHelper.fromTextArray(
-              headerDecoration: pw.BoxDecoration(color: PdfColors.grey200),
-              headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-              cellAlignment: pw.Alignment.centerLeft,
-              headers: ['Category', 'Count'],
-              data: [
-                ['Underweight', (bmiStats['underweight'] ?? 0).toString()],
-                ['Normal', (bmiStats['normal'] ?? 0).toString()],
-                ['Overweight', (bmiStats['overweight'] ?? 0).toString()],
-                ['Obese', (bmiStats['obese'] ?? 0).toString()],
-              ],
-              border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
-              cellHeight: 22,
-              columnWidths: {
-                0: const pw.FlexColumnWidth(2),
-                1: const pw.FlexColumnWidth(1),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 42,
+              getTitlesWidget: (value, meta) {
+                final i = value.toInt();
+                if (i >= 0 && i < weeks.length) {
+                  return Transform.rotate(
+                    angle: -0.6,
+                    child: Text(
+                        DateFormat('MM/dd').format(DateTime.parse(weeks[i])),
+                        style: TextStyle(color: Colors.white70, fontSize: 11)),
+                  );
+                }
+                return const SizedBox.shrink();
               },
             ),
+          ),
+          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        ),
+        borderData: FlBorderData(
+            show: true, border: Border.all(color: Colors.grey[700]!, width: 1)),
+        gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            getDrawingHorizontalLine: (v) => FlLine(
+                color: Colors.grey[800]!.withOpacity(0.3), strokeWidth: 0.5)),
+        barGroups: List.generate(
+            values.length,
+            (i) => BarChartGroupData(x: i, barRods: [
+                  BarChartRodData(
+                    toY: values[i],
+                    width: 20,
+                    color: Colors.pinkAccent,
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(6),
+                        topRight: Radius.circular(6)),
+                    gradient: LinearGradient(colors: [
+                      Colors.pinkAccent.withOpacity(0.7),
+                      Colors.pinkAccent
+                    ], begin: Alignment.bottomCenter, end: Alignment.topCenter),
+                  )
+                ])),
+      ),
+    );
+  }
 
-            pw.SizedBox(height: 18),
-            // Pediatric Malnutrition Table
-            pw.Text('Pediatric Malnutrition (≤5 yrs) — HAZ / WAZ / WHZ', style: sectionTitle),
-            pw.SizedBox(height: 8),
-            pw.TableHelper.fromTextArray(
-              headerDecoration: pw.BoxDecoration(color: PdfColors.grey200),
-              headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-              cellAlignment: pw.Alignment.center,
-              headers: ['Metric', 'Severe', 'Moderate', 'Normal'],
-              data: [
-                ['HAZ', (haz['severe'] ?? 0).toString(), (haz['moderate'] ?? 0).toString(), (haz['normal'] ?? 0).toString()],
-                ['WAZ', (waz['severe'] ?? 0).toString(), (waz['moderate'] ?? 0).toString(), (waz['normal'] ?? 0).toString()],
-                ['WHZ', (whz['severe'] ?? 0).toString(), (whz['moderate'] ?? 0).toString(), (whz['normal'] ?? 0).toString()],
-              ],
-              border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
-              cellHeight: 22,
-              columnWidths: {
-                0: const pw.FlexColumnWidth(2),
-                1: const pw.FlexColumnWidth(1),
-                2: const pw.FlexColumnWidth(1),
-                3: const pw.FlexColumnWidth(1),
+  Widget _buildWeeklyZBarChart(Map<String, dynamic> analyticsData) {
+    final List<dynamic> rows =
+        (analyticsData['weeklyPediatricZTrends'] as List<dynamic>? ?? []);
+    // If there is no pediatric data, show message
+    if (rows.isEmpty ||
+        rows.every((e) => (e['hazCount'] ?? 0) == 0 && (e['wazCount'] ?? 0) == 0 && (e['whzCount'] ?? 0) == 0)) {
+      return Center(
+          child: Text('No weekly pediatric z-score data',
+              style: TextStyle(color: Colors.white70)));
+    }
+    final weeks = rows.map((e) => e['week'] as String).toList();
+    final haz = rows.map((e) => ((e['hazCount'] as num?)?.toDouble() ?? 0.0)).toList();
+    final waz = rows.map((e) => ((e['wazCount'] as num?)?.toDouble() ?? 0.0)).toList();
+    final whz = rows.map((e) => ((e['whzCount'] as num?)?.toDouble() ?? 0.0)).toList();
+
+    // Determine Y max with headroom
+    final allValues = [
+      ...haz,
+      ...waz,
+      ...whz
+    ];
+    double maxY = 10.0;
+    if (allValues.isNotEmpty) {
+      for (final v in allValues) {
+        if (v > maxY) maxY = v;
+      }
+      maxY = (maxY <= 0 ? 10.0 : maxY * 1.2);
+    }
+
+    return BarChart(
+      BarChartData(
+        minY: 0,
+        maxY: maxY,
+        groupsSpace: 14,
+        barTouchData: BarTouchData(
+          touchTooltipData: BarTouchTooltipData(
+            tooltipRoundedRadius: 8,
+            tooltipPadding: EdgeInsets.all(10),
+            getTooltipItem: (group, groupIndex, rod, rodIndex) {
+              final label = ['HAZ', 'WAZ', 'WHZ'][rodIndex];
+              return BarTooltipItem(
+                '${weeks[groupIndex]}\n$label ${rod.toY.toInt()} records',
+                TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600),
+              );
+            },
+          ),
+        ),
+        titlesData: FlTitlesData(
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 44,
+              getTitlesWidget: (value, meta) => Text(value.toInt().toString(),
+                  style: TextStyle(color: Colors.white70, fontSize: 12)),
+            ),
+          ),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 46,
+              getTitlesWidget: (value, meta) {
+                final i = value.toInt();
+                if (i >= 0 && i < weeks.length) {
+                  return Transform.rotate(
+                    angle: -0.6,
+                    child: Text(
+                        DateFormat('MM/dd').format(DateTime.parse(weeks[i])),
+                        style: TextStyle(color: Colors.white70, fontSize: 11)),
+                  );
+                }
+                return const SizedBox.shrink();
               },
             ),
+          ),
+          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        ),
+        borderData: FlBorderData(
+            show: true, border: Border.all(color: Colors.grey[700]!, width: 1)),
+        gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            getDrawingHorizontalLine: (value) => FlLine(
+                color: Colors.grey[800]!.withOpacity(0.3), strokeWidth: 0.5)),
+        barGroups: List.generate(weeks.length, (i) {
+          final rods = <BarChartRodData>[];
+          List<_ZItem> triples = [
+            _ZItem('HAZ', haz[i], Colors.greenAccent),
+            _ZItem('WAZ', waz[i], Colors.orangeAccent),
+            _ZItem('WHZ', whz[i], Colors.lightBlueAccent),
+          ];
+          for (final t in triples) {
+            final double toY = (t.value ?? 0.0);
+            rods.add(
+              BarChartRodData(
+                fromY: 0,
+                toY: toY,
+                width: 10,
+                color: t.color,
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(6), topRight: Radius.circular(6)),
+                gradient: LinearGradient(
+                  colors: [t.color.withOpacity(0.7), t.color],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                ),
+              ),
+            );
+          }
+          return BarChartGroupData(x: i, barRods: rods);
+        }),
+      ),
+    );
+  }
+}
 
-            pw.SizedBox(height: 18),
-            // At-Risk Individuals Table
-            pw.Text('At-Risk Individuals', style: sectionTitle),
-            pw.SizedBox(height: 8),
-            if (atRisk.isEmpty)
-              pw.Text('No at-risk individuals found', style: pw.TextStyle(color: gray, fontSize: 11))
-            else
-              pw.Column(
-                children: atRisk.map((person) {
-                  final String name = (person['name'] ?? '-').toString();
-                  final String age = (person['age'] ?? '-').toString();
-                  final String sex = (person['sex'] ?? '-').toString().toUpperCase();
-                  final DateTime? updated = person['updatedAt'] is DateTime ? person['updatedAt'] as DateTime : null;
-                  final String updatedStr = updated != null ? DateFormat('dd MMM yyyy').format(updated) : '-';
-                  final bool isChild = person['isChild'] == true;
-                  
-                  // Collect all risks for this person
-                  List<String> riskEntries = [];
-                  
-                  // BMI risk
-                  if (person['bmiRisk'] != null) {
-                    final bmi = person['bmi'] as num?;
-                    riskEntries.add('BMI: ${bmi?.toStringAsFixed(1) ?? '-'} (${person['bmiRisk']})');
+class _ZItem {
+  final String label;
+  final double? value;
+  final Color color;
+  _ZItem(this.label, this.value, this.color);
+}
+
+double? _toDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value);
+  return null;
+}
+
+Future<void> _generateProfessionalReport(
+    BuildContext context, Map<String, dynamic> analyticsData) async {
+  try {
+    final pdf = pw.Document();
+
+    // Colors and styles
+    final primary = PdfColor.fromInt(0xFF0A3D00);
+    final gray = PdfColors.grey700;
+    final titleStyle = pw.TextStyle(
+        fontSize: 22, fontWeight: pw.FontWeight.bold, color: PdfColors.black);
+    final sectionTitle = pw.TextStyle(
+        fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.black);
+    final labelStyle = pw.TextStyle(fontSize: 10, color: gray);
+    final valueStyle =
+        pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold);
+
+    // Extract data
+    final int totalUsers = (analyticsData['totalUsers'] ?? 0) as int;
+    final int totalPersons = (analyticsData['totalPersons'] ?? 0) as int;
+    final Map<String, dynamic> bmiStats =
+        (analyticsData['bmiStats'] as Map<String, dynamic>? ?? {});
+    final Map<String, dynamic> mal =
+        (analyticsData['malnutritionStats'] as Map<String, dynamic>? ?? {});
+    final Map<String, dynamic> haz =
+        (mal['haz'] as Map<String, dynamic>? ?? {});
+    final Map<String, dynamic> waz =
+        (mal['waz'] as Map<String, dynamic>? ?? {});
+    final Map<String, dynamic> whz =
+        (mal['whz'] as Map<String, dynamic>? ?? {});
+    final List<dynamic> atRisk =
+        (analyticsData['atRisk'] as List<dynamic>? ?? []);
+
+    // Helper KPI widget
+    pw.Widget kpiTile(String label, String value) {
+      return pw.Container(
+        padding: const pw.EdgeInsets.all(10),
+        decoration: pw.BoxDecoration(
+          border: pw.Border.all(color: PdfColors.grey300, width: 1),
+          borderRadius: pw.BorderRadius.circular(8),
+        ),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text(label, style: labelStyle),
+            pw.SizedBox(height: 4),
+            pw.Text(value, style: valueStyle),
+          ],
+        ),
+      );
+    }
+
+    // Header
+    final now = DateTime.now();
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(24),
+        header: (ctx) => pw.Container(
+          padding: const pw.EdgeInsets.only(bottom: 8),
+          decoration: pw.BoxDecoration(
+            border: pw.Border(
+                bottom: pw.BorderSide(color: PdfColors.grey300, width: 1)),
+          ),
+          child: pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            children: [
+              pw.Container(
+                width: 10,
+                height: 28,
+                decoration: pw.BoxDecoration(
+                    color: primary, borderRadius: pw.BorderRadius.circular(4)),
+              ),
+              pw.SizedBox(width: 10),
+              pw.Text('Professional Analytics Report', style: titleStyle),
+              pw.Spacer(),
+              pw.Text(DateFormat('dd MMM yyyy, HH:mm').format(now),
+                  style: pw.TextStyle(color: gray, fontSize: 10)),
+            ],
+          ),
+        ),
+        build: (ctx) => [
+          // Summary KPIs
+          pw.SizedBox(height: 12),
+          pw.Row(
+            children: [
+              pw.Expanded(child: kpiTile('Total Users', totalUsers.toString())),
+              pw.SizedBox(width: 12),
+              pw.Expanded(
+                  child: kpiTile('Total Records', totalPersons.toString())),
+            ],
+          ),
+
+          pw.SizedBox(height: 18),
+          // BMI Distribution Table
+          pw.Text('BMI Distribution', style: sectionTitle),
+          pw.SizedBox(height: 8),
+          pw.TableHelper.fromTextArray(
+            headerDecoration: pw.BoxDecoration(color: PdfColors.grey200),
+            headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+            cellAlignment: pw.Alignment.centerLeft,
+            headers: ['Category', 'Count'],
+            data: [
+              ['Underweight', (bmiStats['underweight'] ?? 0).toString()],
+              ['Normal', (bmiStats['normal'] ?? 0).toString()],
+              ['Overweight', (bmiStats['overweight'] ?? 0).toString()],
+              ['Obese', (bmiStats['obese'] ?? 0).toString()],
+            ],
+            border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+            cellHeight: 22,
+            columnWidths: {
+              0: const pw.FlexColumnWidth(2),
+              1: const pw.FlexColumnWidth(1),
+            },
+          ),
+
+          pw.SizedBox(height: 18),
+          // Pediatric Malnutrition Table
+          pw.Text('Pediatric Malnutrition (≤5 yrs) — HAZ / WAZ / WHZ',
+              style: sectionTitle),
+          pw.SizedBox(height: 8),
+          pw.TableHelper.fromTextArray(
+            headerDecoration: pw.BoxDecoration(color: PdfColors.grey200),
+            headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+            cellAlignment: pw.Alignment.center,
+            headers: ['Metric', 'Severe', 'Moderate', 'Normal'],
+            data: [
+              [
+                'HAZ',
+                (haz['severe'] ?? 0).toString(),
+                (haz['moderate'] ?? 0).toString(),
+                (haz['normal'] ?? 0).toString()
+              ],
+              [
+                'WAZ',
+                (waz['severe'] ?? 0).toString(),
+                (waz['moderate'] ?? 0).toString(),
+                (waz['normal'] ?? 0).toString()
+              ],
+              [
+                'WHZ',
+                (whz['severe'] ?? 0).toString(),
+                (whz['moderate'] ?? 0).toString(),
+                (whz['normal'] ?? 0).toString()
+              ],
+            ],
+            border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+            cellHeight: 22,
+            columnWidths: {
+              0: const pw.FlexColumnWidth(2),
+              1: const pw.FlexColumnWidth(1),
+              2: const pw.FlexColumnWidth(1),
+              3: const pw.FlexColumnWidth(1),
+            },
+          ),
+
+          pw.SizedBox(height: 18),
+          // At-Risk Individuals Table
+          pw.Text('At-Risk Individuals', style: sectionTitle),
+          pw.SizedBox(height: 8),
+          if (atRisk.isEmpty)
+            pw.Text('No at-risk individuals found',
+                style: pw.TextStyle(color: gray, fontSize: 11))
+          else
+            pw.Column(
+              children: atRisk.map((person) {
+                final String name = (person['name'] ?? '-').toString();
+                final String age = (person['age'] ?? '-').toString();
+                final String sex =
+                    (person['sex'] ?? '-').toString().toUpperCase();
+                final DateTime? updated = person['updatedAt'] is DateTime
+                    ? person['updatedAt'] as DateTime
+                    : null;
+                final String updatedStr = updated != null
+                    ? DateFormat('dd MMM yyyy').format(updated)
+                    : '-';
+                final bool isChild = person['isChild'] == true;
+
+                // Collect all risks for this person
+                List<String> riskEntries = [];
+
+                // BMI risk (exclude for children ≤5)
+                if (!isChild && person['bmiRisk'] != null) {
+                  final bmi = person['bmi'] as num?;
+                  riskEntries.add(
+                      'BMI: ${bmi?.toStringAsFixed(1) ?? '-'} (${person['bmiRisk']})');
+                }
+
+                // Anthropometric risks for children ≤5 years
+                if (isChild) {
+                  if (person['hazRisk'] != null) {
+                    final haz = person['haz'] as num?;
+                    riskEntries.add(
+                        'HAZ: ${haz?.toStringAsFixed(2) ?? '-'} (${person['hazRisk']})');
                   }
-                  
-                  // Anthropometric risks for children ≤5 years
-                  if (isChild) {
-                    if (person['hazRisk'] != null) {
-                      final haz = person['haz'] as num?;
-                      riskEntries.add('HAZ: ${haz?.toStringAsFixed(2) ?? '-'} (${person['hazRisk']})');
-                    }
-                    if (person['wazRisk'] != null) {
-                      final waz = person['waz'] as num?;
-                      riskEntries.add('WAZ: ${waz?.toStringAsFixed(2) ?? '-'} (${person['wazRisk']})');
-                    }
-                    if (person['whzRisk'] != null) {
-                      final whz = person['whz'] as num?;
-                      riskEntries.add('WHZ: ${whz?.toStringAsFixed(2) ?? '-'} (${person['whzRisk']})');
-                    }
+                  if (person['wazRisk'] != null) {
+                    final waz = person['waz'] as num?;
+                    riskEntries.add(
+                        'WAZ: ${waz?.toStringAsFixed(2) ?? '-'} (${person['wazRisk']})');
                   }
-                  
-                  return pw.Container(
-                    margin: pw.EdgeInsets.only(bottom: 8),
-                    padding: pw.EdgeInsets.all(12),
-                    decoration: pw.BoxDecoration(
-                      color: PdfColors.grey100,
-                      border: pw.Border.all(color: PdfColors.grey300, width: 0.5),
-                    ),
-                    child: pw.Column(
+                  if (person['whzRisk'] != null) {
+                    final whz = person['whz'] as num?;
+                    riskEntries.add(
+                        'WHZ: ${whz?.toStringAsFixed(2) ?? '-'} (${person['whzRisk']})');
+                  }
+                }
+
+                return pw.Container(
+                  margin: pw.EdgeInsets.only(bottom: 8),
+                  padding: pw.EdgeInsets.all(12),
+                  decoration: pw.BoxDecoration(
+                    color: PdfColors.grey100,
+                    border: pw.Border.all(color: PdfColors.grey300, width: 0.5),
+                  ),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Row(
+                        children: [
+                          pw.Text(name,
+                              style: pw.TextStyle(
+                                  fontWeight: pw.FontWeight.bold,
+                                  fontSize: 12)),
+                          pw.SizedBox(width: 8),
+                          pw.Text('Age: $age',
+                              style: pw.TextStyle(fontSize: 10, color: gray)),
+                          pw.SizedBox(width: 8),
+                          pw.Text('Sex: $sex',
+                              style: pw.TextStyle(fontSize: 10, color: gray)),
+                          pw.Spacer(),
+                          pw.Text('Updated: $updatedStr',
+                              style: pw.TextStyle(fontSize: 9, color: gray)),
+                        ],
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Text('Risk Metrics:',
+                          style: pw.TextStyle(
+                              fontSize: 10, fontWeight: pw.FontWeight.bold)),
+                      pw.SizedBox(height: 2),
+                      pw.Text(riskEntries.join(' • '),
+                          style: pw.TextStyle(fontSize: 9, color: gray)),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+        ],
+        footer: (ctx) => pw.Container(
+          padding: const pw.EdgeInsets.only(top: 8),
+          decoration: pw.BoxDecoration(
+            border: pw.Border(
+                top: pw.BorderSide(color: PdfColors.grey300, width: 1)),
+          ),
+          child: pw.Row(
+            children: [
+              pw.Text('NutriCare Analytics',
+                  style: pw.TextStyle(color: gray, fontSize: 10)),
+              pw.Spacer(),
+              pw.Text('Page ${ctx.pageNumber}/${ctx.pagesCount}',
+                  style: pw.TextStyle(color: gray, fontSize: 10)),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+      name: 'Professional_Analytics_Report.pdf',
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error generating report: $e')),
+    );
+  }
+}
+
+Future<void> _generateIndividualReport(
+    BuildContext context, String userId, String personId) async {
+  try {
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('persons')
+        .doc(personId)
+        .get();
+    if (!doc.exists) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Person not found')),
+      );
+      return;
+    }
+    final p = doc.data() as Map<String, dynamic>;
+
+    final String name = (((p['firstname'] ?? '') as String) +
+                ' ' +
+                ((p['lastname'] ?? '') as String))
+            .trim()
+            .isEmpty
+        ? (p['name'] ?? 'Person').toString()
+        : (((p['firstname'] ?? '') as String) +
+                ' ' +
+                ((p['lastname'] ?? '') as String))
+            .trim();
+    final int? age = p['age'] is num ? (p['age'] as num).toInt() : null;
+    final String sex = (p['sex'] ?? '-').toString().toUpperCase();
+    final double? height =
+        p['height'] is num ? (p['height'] as num).toDouble() : null;
+    final double? weight =
+        p['weight'] is num ? (p['weight'] as num).toDouble() : null;
+    final double? bmi = p['bmi'] is num ? (p['bmi'] as num).toDouble() : null;
+    final double? haz = p['haz'] is num ? (p['haz'] as num).toDouble() : null;
+    final double? waz = p['waz'] is num ? (p['waz'] as num).toDouble() : null;
+    final double? whz = p['whz'] is num ? (p['whz'] as num).toDouble() : null;
+    final DateTime? updated = _parseTimestamp(p['timestamp']);
+
+    final pdf = pw.Document();
+    final primary = PdfColor.fromInt(0xFF0A3D00);
+    final gray = PdfColors.grey700;
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(24),
+        header: (ctx) => pw.Row(children: [
+          pw.Container(
+              width: 10,
+              height: 24,
+              decoration: pw.BoxDecoration(
+                  color: primary, borderRadius: pw.BorderRadius.circular(4))),
+          pw.SizedBox(width: 8),
+          pw.Text('Individual Health Report',
+              style:
+                  pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+          pw.Spacer(),
+          pw.Text(DateFormat('dd MMM yyyy, HH:mm').format(DateTime.now()),
+              style: pw.TextStyle(color: gray, fontSize: 10))
+        ]),
+        build: (ctx) => [
+          pw.SizedBox(height: 8),
+          pw.Container(
+            padding: const pw.EdgeInsets.all(12),
+            decoration: pw.BoxDecoration(
+                border: pw.Border.all(color: PdfColors.grey300),
+                borderRadius: pw.BorderRadius.circular(8)),
+            child: pw.Row(children: [
+              pw.Expanded(
+                  child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        pw.Row(
-                          children: [
-                            pw.Text(name, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12)),
-                            pw.SizedBox(width: 8),
-                            pw.Text('Age: $age', style: pw.TextStyle(fontSize: 10, color: gray)),
-                            pw.SizedBox(width: 8),
-                            pw.Text('Sex: $sex', style: pw.TextStyle(fontSize: 10, color: gray)),
-                            pw.Spacer(),
-                            pw.Text('Updated: $updatedStr', style: pw.TextStyle(fontSize: 9, color: gray)),
-                          ],
-                        ),
-                        pw.SizedBox(height: 4),
-                        pw.Text('Risk Metrics:', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
-                        pw.SizedBox(height: 2),
-                        pw.Text(riskEntries.join(' • '), style: pw.TextStyle(fontSize: 9, color: gray)),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
-          ],
-          footer: (ctx) => pw.Container(
-            padding: const pw.EdgeInsets.only(top: 8),
-            decoration: pw.BoxDecoration(
-              border: pw.Border(top: pw.BorderSide(color: PdfColors.grey300, width: 1)),
-            ),
-            child: pw.Row(
-              children: [
-                pw.Text('NutriCare Analytics', style: pw.TextStyle(color: gray, fontSize: 10)),
-                pw.Spacer(),
-                pw.Text('Page ${ctx.pageNumber}/${ctx.pagesCount}', style: pw.TextStyle(color: gray, fontSize: 10)),
-              ],
-            ),
+                    pw.Text(name,
+                        style: pw.TextStyle(
+                            fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                    pw.SizedBox(height: 4),
+                    pw.Text('Age: ${age ?? '-'}   Sex: $sex',
+                        style: pw.TextStyle(color: gray, fontSize: 11)),
+                  ])),
+              pw.SizedBox(width: 12),
+              pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.end,
+                  children: [
+                    pw.Text(
+                        'Updated: ${updated != null ? DateFormat('dd MMM yyyy').format(updated) : '-'}',
+                        style: pw.TextStyle(color: gray, fontSize: 10)),
+                  ])
+            ]),
           ),
-        ),
-      );
-
-      await Printing.layoutPdf(
-        onLayout: (PdfPageFormat format) async => pdf.save(),
-        name: 'Professional_Analytics_Report.pdf',
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error generating report: $e')),
-      );
-    }
-  }
-
-  Future<void> _generateIndividualReport(BuildContext context, String userId, String personId) async {
-    try {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .collection('persons')
-          .doc(personId)
-          .get();
-      if (!doc.exists) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Person not found')),
-        );
-        return;
-      }
-      final p = doc.data() as Map<String, dynamic>;
-
-      final String name = (((p['firstname'] ?? '') as String) + ' ' + ((p['lastname'] ?? '') as String)).trim().isEmpty
-          ? (p['name'] ?? 'Person').toString()
-          : (((p['firstname'] ?? '') as String) + ' ' + ((p['lastname'] ?? '') as String)).trim();
-      final int? age = p['age'] is num ? (p['age'] as num).toInt() : null;
-      final String sex = (p['sex'] ?? '-').toString().toUpperCase();
-      final double? height = p['height'] is num ? (p['height'] as num).toDouble() : null;
-      final double? weight = p['weight'] is num ? (p['weight'] as num).toDouble() : null;
-      final double? bmi = p['bmi'] is num ? (p['bmi'] as num).toDouble() : null;
-      final double? haz = p['haz'] is num ? (p['haz'] as num).toDouble() : null;
-      final double? waz = p['waz'] is num ? (p['waz'] as num).toDouble() : null;
-      final double? whz = p['whz'] is num ? (p['whz'] as num).toDouble() : null;
-      final DateTime? updated = _parseTimestamp(p['timestamp']);
-
-      final pdf = pw.Document();
-      final primary = PdfColor.fromInt(0xFF0A3D00);
-      final gray = PdfColors.grey700;
-
-      pdf.addPage(
-        pw.MultiPage(
-          pageFormat: PdfPageFormat.a4,
-          margin: const pw.EdgeInsets.all(24),
-          header: (ctx) => pw.Row(children: [
-            pw.Container(width: 10, height: 24, decoration: pw.BoxDecoration(color: primary, borderRadius: pw.BorderRadius.circular(4))),
-            pw.SizedBox(width: 8),
-            pw.Text('Individual Health Report', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
-            pw.Spacer(),
-            pw.Text(DateFormat('dd MMM yyyy, HH:mm').format(DateTime.now()), style: pw.TextStyle(color: gray, fontSize: 10))
-          ]),
-          build: (ctx) => [
-            pw.SizedBox(height: 8),
-            pw.Container(
-              padding: const pw.EdgeInsets.all(12),
-              decoration: pw.BoxDecoration(border: pw.Border.all(color: PdfColors.grey300), borderRadius: pw.BorderRadius.circular(8)),
-              child: pw.Row(children: [
-                pw.Expanded(child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-                  pw.Text(name, style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
-                  pw.SizedBox(height: 4),
-                  pw.Text('Age: ${age ?? '-'}   Sex: $sex', style: pw.TextStyle(color: gray, fontSize: 11)),
-                ])),
-                pw.SizedBox(width: 12),
-                pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
-                  pw.Text('Updated: ${updated != null ? DateFormat('dd MMM yyyy').format(updated) : '-'}', style: pw.TextStyle(color: gray, fontSize: 10)),
-                ])
-              ]),
-            ),
-            pw.SizedBox(height: 12),
-            pw.TableHelper.fromTextArray(
-              headerDecoration: pw.BoxDecoration(color: PdfColors.grey200),
-              headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-              headers: ['Metric', 'Value', 'Notes'],
-              data: [
-                ['Height (cm)', height?.toStringAsFixed(1) ?? '-', ''],
-                ['Weight (kg)', weight?.toStringAsFixed(1) ?? '-', ''],
+          pw.SizedBox(height: 12),
+          pw.TableHelper.fromTextArray(
+            headerDecoration: pw.BoxDecoration(color: PdfColors.grey200),
+            headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+            headers: ['Metric', 'Value', 'Notes'],
+            data: [
+              ['Height (cm)', height?.toStringAsFixed(1) ?? '-', ''],
+              ['Weight (kg)', weight?.toStringAsFixed(1) ?? '-', ''],
+              if ((age ?? 0) > 5)
                 ['BMI', bmi?.toStringAsFixed(1) ?? '-', _bmiNote(bmi)],
-                if ((age ?? 0) <= 5) ...[
-                  ['HAZ (z)', haz?.toStringAsFixed(2) ?? '-', _zNote('HAZ', haz)],
-                  ['WAZ (z)', waz?.toStringAsFixed(2) ?? '-', _zNote('WAZ', waz)],
-                  ['WHZ (z)', whz?.toStringAsFixed(2) ?? '-', _zNote('WHZ', whz)],
-                ]
-              ],
-              border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
-              cellAlignment: pw.Alignment.centerLeft,
-              cellHeight: 22,
-            ),
-          ],
-          footer: (ctx) => pw.Row(children: [
-            pw.Text('NutriCare • Confidential', style: pw.TextStyle(color: gray, fontSize: 10)),
-            pw.Spacer(),
-            pw.Text('Page ${ctx.pageNumber}/${ctx.pagesCount}', style: pw.TextStyle(color: gray, fontSize: 10)),
-          ]),
-        ),
-      );
+              if ((age ?? 0) <= 5) ...[
+                ['HAZ (z)', haz?.toStringAsFixed(2) ?? '-', _zNote('HAZ', haz)],
+                ['WAZ (z)', waz?.toStringAsFixed(2) ?? '-', _zNote('WAZ', waz)],
+                ['WHZ (z)', whz?.toStringAsFixed(2) ?? '-', _zNote('WHZ', whz)],
+              ]
+            ],
+            border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+            cellAlignment: pw.Alignment.centerLeft,
+            cellHeight: 22,
+          ),
+        ],
+        footer: (ctx) => pw.Row(children: [
+          pw.Text('NutriCare • Confidential',
+              style: pw.TextStyle(color: gray, fontSize: 10)),
+          pw.Spacer(),
+          pw.Text('Page ${ctx.pageNumber}/${ctx.pagesCount}',
+              style: pw.TextStyle(color: gray, fontSize: 10)),
+        ]),
+      ),
+    );
 
-      await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save(), name: '${name.replaceAll(' ', '_')}_Report.pdf');
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error generating individual report: $e')),
-      );
-    }
+    await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdf.save(),
+        name: '${name.replaceAll(' ', '_')}_Report.pdf');
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error generating individual report: $e')),
+    );
   }
+}
 
-  String _bmiNote(double? bmi) {
-    if (bmi == null) return '';
-    if (bmi < 18.5) return 'Underweight';
-    if (bmi < 25) return 'Normal';
-    if (bmi < 30) return 'Overweight';
-    return 'Obesity';
-  }
+String _bmiNote(double? bmi) {
+  if (bmi == null) return '';
+  if (bmi < 18.5) return 'Underweight';
+  if (bmi < 25) return 'Normal';
+  if (bmi < 30) return 'Overweight';
+  return 'Obesity';
+}
 
-  String _zNote(String metric, double? z) {
-    if (z == null) return '';
-    if (z < -3) return 'Severe low $metric';
-    if (z < -2) return 'Low $metric';
-    if (z > 3) return 'Severe high $metric';
-    if (z > 2) return 'High $metric';
-    return 'Normal';
-  }
+String _zNote(String metric, double? z) {
+  if (z == null) return '';
+  if (z < -3) return 'Severe low $metric';
+  if (z < -2) return 'Low $metric';
+  if (z > 3) return 'Severe high $metric';
+  if (z > 2) return 'High $metric';
+  return 'Normal';
+}
 
-  DateTime? _parseTimestamp(dynamic timestamp) {
-    if (timestamp == null) return null;
-    if (timestamp is Timestamp) return timestamp.toDate();
-    if (timestamp is DateTime) return timestamp;
-    if (timestamp is int) return DateTime.fromMillisecondsSinceEpoch(timestamp);
-    return null;
-  }
+DateTime? _parseTimestamp(dynamic timestamp) {
+  if (timestamp == null) return null;
+  if (timestamp is Timestamp) return timestamp.toDate();
+  if (timestamp is DateTime) return timestamp;
+  if (timestamp is int) return DateTime.fromMillisecondsSinceEpoch(timestamp);
+  return null;
 }

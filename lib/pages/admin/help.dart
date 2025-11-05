@@ -47,6 +47,8 @@ class AdminHelpPage extends StatelessWidget {
                   const SizedBox(height: 25),
                   _buildFAQSection(),
                   const SizedBox(height: 25),
+                  _buildTermsSection(),
+                  const SizedBox(height: 25),
                   _buildContactSection(context),
                   const SizedBox(height: 30),
                 ],
@@ -125,27 +127,27 @@ class AdminHelpPage extends StatelessWidget {
           ),
         ),
         _buildFAQItem(
-          'How do I add Admin?',
-          'To reset your password, go to the login screen and click "Forgot Password". You will receive an email with instructions to create a new password. If you don\'t receive the email within a few minutes, please check your spam folder.',
-          Icons.lock_reset,
+          'How do I add or manage administrators?',
+          'Go to Admin Dashboard → Users/Administrators and use Add, Edit, or Disable to manage accounts. Ensure role assignments follow least-privilege access.',
+          Icons.admin_panel_settings,
         ),
         const SizedBox(height: 10),
         _buildFAQItem(
           'How can I contact support?',
-          'You can contact support by clicking the "Contact Us" button at the bottom of this page. Our support team is available Monday through Friday, 9 AM to 5 PM. Please allow up to 24 hours for a response.',
+          'Use the Contact Support button below. Our team responds Monday–Friday, 9:00–17:00. Typical response time is within 1 business day.',
           Icons.contact_support,
         ),
         const SizedBox(height: 10),
         _buildFAQItem(
-          'How do I monitor BMI Progress?',
-          'You can track your nutrition goals by using the dashboard in the main screen. Set your target calories, protein, carbs, and fats, then log your meals throughout the day. The app will calculate your progress automatically.',
+          'How do I review growth analytics (BMI, HAZ, WAZ, WHZ)?',
+          'Open Analytics → Professional Dashboard. Use filters (age/sex) to refine cohorts. Charts show distributions and pediatric indicators for ≤5 years.',
           Icons.track_changes,
         ),
         const SizedBox(height: 10),
         _buildFAQItem(
-          'How to manage all contents?',
-          'Yes! When viewing any recipe, tap the heart icon in the top right corner to save it to your favorites. You can access your favorite recipes from the "Favorites" tab in the app.',
-          Icons.favorite,
+          'Can I export reports or summaries?',
+          'Yes. In Analytics, use Export/Print to generate a professional PDF including distributions, pediatric tables, and at‑risk summaries.',
+          Icons.picture_as_pdf,
         ),
       ],
     );
@@ -187,6 +189,74 @@ class AdminHelpPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTermsSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[900],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.policy,
+                color: Colors.green,
+                size: 24,
+              ),
+              const SizedBox(width: 10),
+              const Text(
+                'Terms & Policies',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _buildFAQItem(
+            'Medical Disclaimer',
+            'The app provides analytics and guidance for educational and programmatic support only and does not replace professional medical advice, diagnosis, or treatment.',
+            Icons.healing,
+          ),
+          const SizedBox(height: 10),
+          _buildFAQItem(
+            'Data Privacy & Security',
+            'We store data securely and restrict access based on roles. Do not upload sensitive data beyond what is necessary. Report incidents immediately to the system administrator.',
+            Icons.privacy_tip,
+          ),
+          const SizedBox(height: 10),
+          _buildFAQItem(
+            'Consent and Children’s Data',
+            'For children (≤5 years), ensure appropriate consent from parents/guardians and comply with applicable child-protection and privacy regulations.',
+            Icons.child_care,
+          ),
+          const SizedBox(height: 10),
+          _buildFAQItem(
+            'Acceptable Use',
+            'Use data only for authorized program objectives. Do not attempt to re-identify anonymized data or share outside approved channels.',
+            Icons.rule,
+          ),
+          const SizedBox(height: 10),
+          _buildFAQItem(
+            'Contact and Governance',
+            'Questions about terms, privacy, or data requests should be directed to the designated data controller or support contact listed below.',
+            Icons.gavel,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Last updated: ${DateTime.now().year}',
+            style: TextStyle(fontSize: 12, color: Colors.grey[400]),
+          ),
+        ],
       ),
     );
   }

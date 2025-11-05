@@ -287,6 +287,8 @@ class _ViewPersonsState extends State<ViewPersons> {
                                       ? 'Obese'
                                       : rawBmiCategory;
                               final bmi = person['bmi'] ?? 0.0;
+                              final int? ageYears = (person['age'] as num?)?.toInt();
+                              final bool isUnderFive = (ageYears ?? 99) <= 5;
 
                               _expandedCards.putIfAbsent(documentId, () => false);
 
@@ -460,7 +462,8 @@ class _ViewPersonsState extends State<ViewPersons> {
                                                     spacing: 8,
                                                     runSpacing: 8,
                                                     children: [
-                                                      Container(
+                                                      if (!isUnderFive)
+                                                        Container(
                                                         padding: const EdgeInsets
                                                             .symmetric(
                                                             horizontal: 16,
@@ -927,13 +930,14 @@ class _ViewPersonsState extends State<ViewPersons> {
                                                                 fontWeight: FontWeight.bold,
                                                               ),
                                                             ),
-                                                            Text(
-                                                              "BMI: ${(person['bmi'] ?? 0.0).toStringAsFixed(1)} - ${person['bmiCategory'] ?? 'Unknown'}",
-                                                              style: TextStyle(
-                                                                color: Colors.grey[400],
-                                                                fontSize: 12,
+                                                            if (((person['age'] as num?)?.toInt() ?? 99) > 5)
+                                                              Text(
+                                                                "BMI: ${(person['bmi'] ?? 0.0).toStringAsFixed(1)} - ${person['bmiCategory'] ?? 'Unknown'}",
+                                                                style: TextStyle(
+                                                                  color: Colors.grey[400],
+                                                                  fontSize: 12,
+                                                                ),
                                                               ),
-                                                            ),
                                                           ],
                                                         ),
                                                       ),

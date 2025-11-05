@@ -428,6 +428,7 @@ class _ViewPersons2State extends State<ViewPersons2> {
                                                   '$weight kg',
                                                   Icons.monitor_weight_outlined,
                                                 ),
+                                              if (!isUnderFive)
                                                 _buildInfoTile(
                                                   'BMI',
                                                   bmi.toStringAsFixed(1),
@@ -436,6 +437,15 @@ class _ViewPersons2State extends State<ViewPersons2> {
                                                   color: getBmiCategoryColor(
                                                       bmiCategory),
                                                 ),
+                                                if (!isUnderFive)
+                                                  _buildInfoTile(
+                                                    'BMI',
+                                                    bmi.toStringAsFixed(1),
+                                                    Icons.analytics_outlined,
+                                                    highlight: true,
+                                                    color: getBmiCategoryColor(
+                                                        bmiCategory),
+                                                  ),
                                                   if (isUnderFive && haz != null)
                                                     _buildZScoreTile('HAZ', haz),
                                                   if (isUnderFive && waz != null)
@@ -795,7 +805,8 @@ class _ViewPersons2State extends State<ViewPersons2> {
                           child: pw.Column(
                             crossAxisAlignment: pw.CrossAxisAlignment.start,
                             children: [
-                              pw.Text('BMI: $bmi', style: normalStyle),
+                              if (((person['age'] as int?) ?? int.tryParse(person['age']?.toString() ?? '') ?? 0) > 5)
+                                pw.Text('BMI: $bmi', style: normalStyle),
                               if (person['haz'] != null)
                                 pw.Text('HAZ: ${person['haz'].toStringAsFixed(2)}', style: normalStyle),
                               if (person['waz'] != null)

@@ -56,6 +56,8 @@ class HelpPage extends StatelessWidget {
                   const SizedBox(height: 25),
                   _buildFAQSection(),
                   const SizedBox(height: 25),
+                  _buildTermsSection(),
+                  const SizedBox(height: 25),
                   _buildContactSection(context),
                   const SizedBox(height: 30),
                 ],
@@ -135,26 +137,26 @@ class HelpPage extends StatelessWidget {
         ),
         _buildFAQItem(
           'How do I reset my password?',
-          'To reset your password, go to the login screen and click "Forgot Password". You will receive an email with instructions to create a new password. If you don\'t receive the email within a few minutes, please check your spam folder.',
+          'From the login screen, tap “Forgot Password” and follow the email instructions. Check spam/junk if you do not receive the email.',
           Icons.lock_reset,
         ),
         const SizedBox(height: 10),
         _buildFAQItem(
           'How can I contact support?',
-          'You can contact support by clicking the "Contact Us" button at the bottom of this page. Our support team is available Monday through Friday, 9 AM to 5 PM. Please allow up to 24 hours for a response.',
+          'Tap “Contact Us” below. Support is available Monday–Friday, 9:00–17:00. We typically respond within 1 business day.',
           Icons.contact_support,
         ),
         const SizedBox(height: 10),
         _buildFAQItem(
-          'How do I track my nutrition goals?',
-          'You can track your nutrition goals by using the dashboard in the main screen. Set your target calories, protein, carbs, and fats, then log your meals throughout the day. The app will calculate your progress automatically.',
+          'How do I view my growth and BMI?',
+          'Open Analytics to see your height, weight, and BMI charts. For children ≤5 years, pediatric growth indicators (HAZ, WAZ, WHZ) are shown when available.',
           Icons.track_changes,
         ),
         const SizedBox(height: 10),
         _buildFAQItem(
-          'Can I save favorite recipes?',
-          'Yes! When viewing any recipe, tap the heart icon in the top right corner to save it to your favorites. You can access your favorite recipes from the "Favorites" tab in the app.',
-          Icons.favorite,
+          'How accurate are the results?',
+          'Values are based on the data you provide and standard references. Results are informational and do not replace professional medical advice.',
+          Icons.info_outline,
         ),
       ],
     );
@@ -196,6 +198,68 @@ class HelpPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTermsSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[900],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.policy,
+                color: Colors.green,
+                size: 24,
+              ),
+              const SizedBox(width: 10),
+              const Text(
+                'Terms & Policies',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _buildFAQItem(
+            'Medical Disclaimer',
+            'Information provided is educational and not a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified health professional.',
+            Icons.healing,
+          ),
+          const SizedBox(height: 10),
+          _buildFAQItem(
+            'Privacy & Data Use',
+            'We collect only necessary data to provide analytics. Your information is stored securely and not shared without permission, except as required by law.',
+            Icons.privacy_tip,
+          ),
+          const SizedBox(height: 10),
+          _buildFAQItem(
+            'Children’s Data and Consent',
+            'For children (≤5 years), data entry should be done by or with consent of a parent/guardian. Follow local regulations and program policies.',
+            Icons.child_care,
+          ),
+          const SizedBox(height: 10),
+          _buildFAQItem(
+            'Acceptable Use',
+            'Use the app responsibly and do not misuse or attempt to access others’ data. Report any issues to support.',
+            Icons.rule,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Last updated: ${DateTime.now().year}',
+            style: TextStyle(fontSize: 12, color: Colors.grey[400]),
+          ),
+        ],
       ),
     );
   }
