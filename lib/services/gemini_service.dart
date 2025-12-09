@@ -10,12 +10,14 @@ class GeminiService {
 
   static GenerativeModel? _model;
   static String? _apiKey;
-  static String _currentModelName = 'gemini-1.5-pro-latest';
+  static String _currentModelName = 'gemini-2.5-flash';
   static const List<String> _modelFallbackOrder = <String>[
-    // Prefer PRO variants first
+    // Prefer newest FLASH first
+    'gemini-2.5-flash',
+    // Then PRO variants
     'gemini-1.5-pro-latest',
     'gemini-1.5-pro-001',
-    // Then try FLASH variants
+    // Then FLASH variants
     'gemini-1.5-flash-latest',
     'gemini-1.5-flash-001',
     'gemini-1.5-flash',
@@ -51,9 +53,10 @@ class GeminiService {
 
   static void _buildModel(String modelName) {
     _currentModelName = modelName;
-    // Allow larger completions to avoid truncated responses. Use higher limits for 2.0 models.
-    final int maxTokens =
-        _currentModelName.startsWith('gemini-2.0') ? 8192 : 4096;
+    // Allow larger completions to avoid truncated responses. Use higher limits for 2.x models.
+    final int maxTokens = _currentModelName.startsWith('gemini-2')
+        ? 8192
+        : 4096;
     _model = GenerativeModel(
       model: _currentModelName,
       apiKey: _apiKey!,

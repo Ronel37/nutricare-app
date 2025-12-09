@@ -346,7 +346,7 @@ class _AddPersonState extends State<AddPerson> {
                               whz = WhoGrowthService.whzZ(heightCm: heightCm, sex: sex, weightKg: weightKg);
                             }
 
-                            await FirebaseFirestore.instance
+                            final personRef = await FirebaseFirestore.instance
                                 .collection('users')
                                 .doc(userId)
                                 .collection('persons')
@@ -386,6 +386,7 @@ class _AddPersonState extends State<AddPerson> {
                                 builder: (context) => BMIResult(
                                   height: height,
                                   weight: weight,
+                                  personId: personRef.id,
                                 ),
                               ),
                             );

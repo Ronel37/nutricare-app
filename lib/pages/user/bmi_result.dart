@@ -6,8 +6,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 class BMIResult extends StatelessWidget {
   final double height;
   final double weight;
+  final String personId;
 
-  const BMIResult({super.key, required this.height, required this.weight});
+  const BMIResult({
+    super.key,
+    required this.height,
+    required this.weight,
+    required this.personId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -173,6 +179,7 @@ class BMIResult extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (context) => SolutionPage(
                               bmiCategory: bmiCategory,
+                              personId: personId,
                             ),
                           ),
                         );

@@ -8,8 +8,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class SolutionPage extends StatefulWidget {
   final String bmiCategory;
+  final String personId;
 
-  const SolutionPage({super.key, required this.bmiCategory});
+  const SolutionPage({
+    super.key,
+    required this.bmiCategory,
+    required this.personId,
+  });
 
   @override
   State<SolutionPage> createState() => _SolutionPageState();
@@ -37,17 +42,16 @@ class _SolutionPageState extends State<SolutionPage> {
 
   Future<void> _loadUserDataAndGenerateAI() async {
     try {
-      // Load user's latest person data
-      final userData = await _firestore
+      // Load the specific person that was just added so we can tie AI output to them
+      final personSnap = await _firestore
           .collection('users')
           .doc(userId)
           .collection('persons')
-          .orderBy('timestamp', descending: true)
-          .limit(1)
+          .doc(widget.personId)
           .get();
 
-      if (userData.docs.isNotEmpty) {
-        final data = userData.docs.first.data();
+      if (personSnap.exists) {
+        final data = personSnap.data() as Map<String, dynamic>;
         final age = data['age'] as int?;
         final sex = data['sex'] as String?;
         final dietaryPreference = data['dietaryPreference'] as String?;
@@ -102,19 +106,18 @@ class _SolutionPageState extends State<SolutionPage> {
       await GeminiService.initialize();
       
       // Get user data for more personalized recommendations
-      final userData = await _firestore
+      final personSnap = await _firestore
           .collection('users')
           .doc(userId)
           .collection('persons')
-          .orderBy('timestamp', descending: true)
-          .limit(1)
+          .doc(widget.personId)
           .get();
       
       String? dietaryPreference;
       String? healthGoal;
       
-      if (userData.docs.isNotEmpty) {
-        final data = userData.docs.first.data();
+      if (personSnap.exists) {
+        final data = personSnap.data() as Map<String, dynamic>;
         dietaryPreference = data['dietaryPreference'] as String?;
         healthGoal = data['healthGoal'] as String?;
         final dietaryPreferenceText = data['dietaryPreferenceText'] as String?;
@@ -154,6 +157,13 @@ class _SolutionPageState extends State<SolutionPage> {
         sex: _userSex!,
       );
 
+      // Persist the personalized recommendation (and extras) to the person record
+      await _saveRecommendationsToPerson(
+        personalRecommendation: recommendations,
+        mealSuggestions: mealSuggestions,
+        nutritionTips: nutritionTips,
+      );
+
       setState(() {
         _aiRecommendations = recommendations;
         _aiMealSuggestions = mealSuggestions;
@@ -165,6 +175,29 @@ class _SolutionPageState extends State<SolutionPage> {
       setState(() {
         _isLoadingAI = false;
       });
+    }
+  }
+
+  Future<void> _saveRecommendationsToPerson({
+    required String personalRecommendation,
+    String? mealSuggestions,
+    String? nutritionTips,
+  }) async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('persons')
+          .doc(widget.personId)
+          .update({
+        'aiPersonalRecommendation': personalRecommendation,
+        if (mealSuggestions != null) 'aiMealSuggestions': mealSuggestions,
+        if (nutritionTips != null) 'aiNutritionTips': nutritionTips,
+        'aiRecommendationUpdatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      // Keep UI responsive even if persistence fails
+      print('Error saving AI recommendations: $e');
     }
   }
 

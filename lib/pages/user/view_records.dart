@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:nutricare_app/pages/user/edit_person.dart';
+import 'package:nutricare_app/pages/user/view_recommendations.dart';
 
 class ViewPersons extends StatefulWidget {
   @override
@@ -20,6 +21,23 @@ class _ViewPersonsState extends State<ViewPersons> {
   
   // Track history dropdown expansion
   bool _isHistoryExpanded = false;
+  String _bmiCategoryFilter = 'All';
+  String _sortOrder = 'Recent';
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
+  final List<String> _bmiCategoryOptions = const [
+    'All',
+    'Underweight',
+    'Normal',
+    'Overweight',
+    'Obese',
+  ];
+
+  final List<String> _sortOptions = const [
+    'Recent',
+    'Old',
+  ];
 
   Color getBmiCategoryColor(String bmiCategory) {
     switch (bmiCategory) {
@@ -40,6 +58,12 @@ class _ViewPersonsState extends State<ViewPersons> {
 
   String _formatTimestamp(Timestamp timestamp) {
     return '${timestamp.toDate().day}/${timestamp.toDate().month}/${timestamp.toDate().year}';
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Widget _buildInfoRow(IconData icon, String label, String value) {
@@ -210,6 +234,138 @@ class _ViewPersonsState extends State<ViewPersons> {
                     color: Colors.grey[400],
                   ),
                 ),
+                const SizedBox(height: 12),
+                // Search bar
+                TextField(
+                  controller: _searchController,
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value;
+                    });
+                  },
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'Search persons by name...',
+                    hintStyle: TextStyle(color: Colors.grey[500]),
+                    prefixIcon: const Icon(Icons.search, color: Colors.white70),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, color: Colors.white70),
+                            onPressed: () {
+                              setState(() {
+                                _searchQuery = '';
+                                _searchController.clear();
+                              });
+                            },
+                          )
+                        : null,
+                    filled: true,
+                    fillColor: Colors.grey[900],
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey[800]!),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF0A3D00), width: 1.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    PopupMenuButton<String>(
+                      initialValue: _bmiCategoryFilter,
+                      color: Colors.grey[900],
+                      onSelected: (value) {
+                        setState(() {
+                          _bmiCategoryFilter = value;
+                        });
+                      },
+                      itemBuilder: (context) => _bmiCategoryOptions
+                          .map(
+                            (option) => PopupMenuItem(
+                              value: option,
+                              child: Text(
+                                option == 'All' ? 'All BMI records' : option,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[900],
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey[800]!),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.filter_list,
+                                color: Colors.white, size: 18),
+                            const SizedBox(width: 6),
+                            Text(
+                              _bmiCategoryFilter == 'All'
+                                  ? 'All BMI records'
+                                  : 'Filter: $_bmiCategoryFilter',
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    PopupMenuButton<String>(
+                      initialValue: _sortOrder,
+                      color: Colors.grey[900],
+                      onSelected: (value) {
+                        setState(() {
+                          _sortOrder = value;
+                        });
+                      },
+                      itemBuilder: (context) => _sortOptions
+                          .map(
+                            (option) => PopupMenuItem(
+                              value: option,
+                              child: Text(
+                                option == 'Recent' ? 'Newest' : 'Oldest',
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[900],
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey[800]!),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.access_time,
+                                color: Colors.white, size: 18),
+                            const SizedBox(width: 6),
+                            Text(
+                              _sortOrder == 'Recent'
+                                  ? 'Newest first'
+                                  : 'Oldest first',
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 20),
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
@@ -268,17 +424,76 @@ class _ViewPersonsState extends State<ViewPersons> {
                         );
                       }
 
+                      final orderedDocs = _sortOrder == 'Recent'
+                          ? data
+                          : data.reversed.toList();
+
+                      final filteredData = orderedDocs.where((doc) {
+                        final person = doc.data() as Map<String, dynamic>;
+                        final rawCategory =
+                            (person['bmiCategory'] ?? 'Unknown').toString();
+                        final matchesCategory = _bmiCategoryFilter == 'All'
+                            ? true
+                            : rawCategory
+                                .toLowerCase()
+                                .contains(_bmiCategoryFilter.toLowerCase());
+
+                        if (!matchesCategory) return false;
+
+                        // Search filter by name
+                        final query = _searchQuery.trim().toLowerCase();
+                        if (query.isEmpty) return true;
+                        final first = (person['firstname'] ?? '').toString().toLowerCase();
+                        final last = (person['lastname'] ?? '').toString().toLowerCase();
+                        final full = '$first $last'.trim();
+                        return first.contains(query) ||
+                            last.contains(query) ||
+                            full.contains(query);
+                      }).toList();
+
+                      if (filteredData.isEmpty) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.search_off,
+                                color: Colors.grey[600],
+                                size: 64,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'No persons match your search.',
+                                style: TextStyle(
+                                  color: Colors.grey[400],
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                'Try adjusting the name or BMI filters.',
+                                style: TextStyle(
+                                  color: Colors.grey[500],
+                                  fontSize: 14,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
                       return ListView(
                         children: [
                           // Main Records Section
                           ListView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            itemCount: data.length,
+                            itemCount: filteredData.length,
                             itemBuilder: (context, index) {
                               final person =
-                                  data[index].data() as Map<String, dynamic>;
-                              final documentId = data[index].id;
+                                  filteredData[index].data() as Map<String, dynamic>;
+                              final documentId = filteredData[index].id;
                               final rawBmiCategory =
                                   person['bmiCategory'] ?? 'Unknown';
                               final bmiCategory = rawBmiCategory == 'Normal weight'
@@ -289,6 +504,10 @@ class _ViewPersonsState extends State<ViewPersons> {
                               final bmi = person['bmi'] ?? 0.0;
                               final int? ageYears = (person['age'] as num?)?.toInt();
                               final bool isUnderFive = (ageYears ?? 99) <= 5;
+                              final bool hasRecommendations =
+                                  person['aiPersonalRecommendation'] != null ||
+                                      person['aiMealSuggestions'] != null ||
+                                      person['aiNutritionTips'] != null;
 
                               _expandedCards.putIfAbsent(documentId, () => false);
 
@@ -552,9 +771,92 @@ class _ViewPersonsState extends State<ViewPersons> {
                                                           ),
                                                         ),
                                                       // Action buttons
-                                                      Row(
-                                                        mainAxisSize: MainAxisSize.min,
+                                                      Wrap(
+                                                        spacing: 8,
+                                                        runSpacing: 8,
                                                         children: [
+                                                          Container(
+                                                            decoration: BoxDecoration(
+                                                              color: Colors.blueGrey[800],
+                                                              borderRadius:
+                                                                  BorderRadius.circular(12),
+                                                              boxShadow: [
+                                                                BoxShadow(
+                                                                  color: Colors.blueGrey
+                                                                      .withOpacity(0.3),
+                                                                  blurRadius: 6,
+                                                                  offset: const Offset(0, 2),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            child: IconButton(
+                                                              icon: const Icon(
+                                                                Icons.history,
+                                                                color: Colors.white,
+                                                                size: 20,
+                                                              ),
+                                                              onPressed: () {
+                                                                Navigator.push(
+                                                                  context,
+                                                                  MaterialPageRoute(
+                                                                    builder: (context) =>
+                                                                        UpdateHistoryScreen(
+                                                                      personId: documentId,
+                                                                      personName:
+                                                                          "${person['firstname']} ${person['lastname']}",
+                                                                      bmi: bmi,
+                                                                      bmiCategory:
+                                                                          rawBmiCategory,
+                                                                      personCollection:
+                                                                          personCollection,
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              },
+                                                            ),
+                                                          ),
+                                                          Container(
+                                                            decoration: BoxDecoration(
+                                                              color: hasRecommendations
+                                                                  ? Colors.purple[700]
+                                                                  : Colors.blueGrey[800],
+                                                              borderRadius: BorderRadius.circular(12),
+                                                              boxShadow: [
+                                                                BoxShadow(
+                                                                  color: (hasRecommendations
+                                                                          ? Colors.purple
+                                                                          : Colors.blueGrey)
+                                                                      .withOpacity(0.3),
+                                                                  blurRadius: 6,
+                                                                  offset: const Offset(0, 2),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            child: IconButton(
+                                                              icon: const Icon(
+                                                                Icons.psychology,
+                                                                color: Colors.white,
+                                                                size: 20,
+                                                              ),
+                                                              tooltip: hasRecommendations
+                                                                  ? 'View saved recommendations'
+                                                                  : 'No recommendations yet',
+                                                              onPressed: () {
+                                                                Navigator.push(
+                                                                  context,
+                                                                  MaterialPageRoute(
+                                                                    builder: (context) =>
+                                                                        PersonRecommendationsView(
+                                                                      personId: documentId,
+                                                                      personName:
+                                                                          "${person['firstname']} ${person['lastname']}",
+                                                                      bmiCategory: rawBmiCategory,
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              },
+                                                            ),
+                                                          ),
                                                           Container(
                                                             decoration:
                                                                 BoxDecoration(
@@ -612,7 +914,6 @@ class _ViewPersonsState extends State<ViewPersons> {
                                                               },
                                                             ),
                                                           ),
-                                                          const SizedBox(width: 8),
                                                           Container(
                                                             decoration:
                                                                 BoxDecoration(
@@ -867,7 +1168,8 @@ class _ViewPersonsState extends State<ViewPersons> {
                                         physics: const NeverScrollableScrollPhysics(),
                                         itemCount: data.length,
                                         itemBuilder: (context, index) {
-                                          final person = data[index].data() as Map<String, dynamic>;
+                                          final person =
+                                              data[index].data() as Map<String, dynamic>;
                                           final documentId = data[index].id;
                                           
                                           return Container(
@@ -1093,5 +1395,299 @@ class _ViewPersonsState extends State<ViewPersons> {
         ),
       ),
     );
+  }
+}
+
+class UpdateHistoryScreen extends StatelessWidget {
+  final String personId;
+  final String personName;
+  final double? bmi;
+  final String? bmiCategory;
+  final CollectionReference personCollection;
+
+  const UpdateHistoryScreen({
+    super.key,
+    required this.personId,
+    required this.personName,
+    required this.bmi,
+    required this.bmiCategory,
+    required this.personCollection,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          '$personName History',
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.black,
+              Color(0xFF0A3D00),
+              Colors.black,
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildPersonSummary(),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: personCollection
+                        .doc(personId)
+                        .collection('updateHistory')
+                        .orderBy('updatedAt', descending: true)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            color: Color(0xFF0A3D00),
+                          ),
+                        );
+                      }
+
+                      if (!snapshot.hasData ||
+                          snapshot.data!.docs.isEmpty) {
+                        return _buildEmptyState();
+                      }
+
+                      final historyData = snapshot.data!.docs;
+                      return ListView.builder(
+                        itemCount: historyData.length,
+                        itemBuilder: (context, index) {
+                          final history = historyData[index].data()
+                              as Map<String, dynamic>;
+                          final updateType =
+                              history['updateType'] ?? 'modification';
+                          final updatedAt =
+                              history['updatedAt'] as Timestamp;
+
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[900],
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: updateType == 'creation'
+                                    ? Colors.green.withOpacity(0.3)
+                                    : Colors.blue.withOpacity(0.3),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: updateType == 'creation'
+                                            ? Colors.green[600]
+                                            : Colors.blue[600],
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            updateType == 'creation'
+                                                ? Icons.add_circle
+                                                : Icons.edit,
+                                            color: Colors.white,
+                                            size: 14,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            updateType == 'creation'
+                                                ? 'Created'
+                                                : 'Updated',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Text(
+                                      _formatTimestamp(updatedAt),
+                                      style: TextStyle(
+                                        color: Colors.grey[400],
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                ..._buildHistoryDetails(history),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPersonSummary() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[900],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[800]!),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            personName,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          if (bmi != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                'BMI: ${bmi!.toStringAsFixed(1)} (${bmiCategory ?? 'Unknown'})',
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.history_edu,
+            color: Colors.grey[600],
+            size: 64,
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'No update history available',
+            style: TextStyle(color: Colors.white70, fontSize: 16),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Updates to this record will appear here.',
+            style: TextStyle(color: Colors.white54, fontSize: 14),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildHistoryDetails(Map<String, dynamic> history) {
+    final List<Widget> details = [];
+
+    void addDetail(IconData icon, String label, String value) {
+      details.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Row(
+            children: [
+              Icon(icon, color: Colors.grey[400], size: 16),
+              const SizedBox(width: 8),
+              Text(
+                '$label:',
+                style: const TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  value,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (history['name'] != null) {
+      addDetail(Icons.person, 'Name', history['name']);
+    }
+    if (history['age'] != null) {
+      addDetail(Icons.cake, 'Age', '${history['age']} years');
+    }
+    if (history['height'] != null) {
+      addDetail(Icons.height, 'Height', '${history['height']} m');
+    }
+    if (history['weight'] != null) {
+      addDetail(Icons.line_weight, 'Weight', '${history['weight']} kg');
+    }
+    if (history['sex'] != null) {
+      addDetail(Icons.person_outline, 'Sex', history['sex']);
+    }
+    if (history['dietaryPreference'] != null) {
+      addDetail(
+          Icons.restaurant, 'Diet', history['dietaryPreference']);
+    }
+    if (history['healthGoal'] != null) {
+      addDetail(
+          Icons.fitness_center, 'Goal', history['healthGoal']);
+    }
+    if (history['profilePic'] != null) {
+      addDetail(Icons.photo_camera, 'Profile Picture', 'Updated');
+    }
+
+    if (details.isEmpty) {
+      details.add(
+        const Text(
+          'No additional details provided for this update.',
+          style: TextStyle(color: Colors.white54),
+        ),
+      );
+    }
+
+    return details;
+  }
+
+  String _formatTimestamp(Timestamp timestamp) {
+    final date = timestamp.toDate();
+    return '${date.day}/${date.month}/${date.year}';
   }
 }

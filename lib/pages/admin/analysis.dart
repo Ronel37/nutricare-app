@@ -391,7 +391,8 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
           SizedBox(height: 32),
           _buildMainChart(analyticsData),
           SizedBox(height: 32),
-          // Weekly progress section removed as requested
+          _buildWeeklyProgressSection(analyticsData),
+          SizedBox(height: 32),
           _buildAtRiskTable(analyticsData),
           SizedBox(height: 32),
           _buildUserInsights(analyticsData),
@@ -1706,7 +1707,7 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
       // monthly BMI trend
       Map<String, List<double>> monthToBmis = {};
       // weekly trends
-      Map<DateTime, List<double>> weekToBmis = {};
+      Map<DateTime, Map<String, int>> weekToBmiCats = {};
       Map<DateTime, List<double>> weekToHaz = {};
       Map<DateTime, List<double>> weekToWaz = {};
       Map<DateTime, List<double>> weekToWhz = {};
@@ -1819,9 +1820,25 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
             if (ts != null) {
               final monthKey = DateFormat('MMMM yyyy').format(ts);
               monthToBmis.putIfAbsent(monthKey, () => []).add(bmi);
-              // Weekly BMI trend (all ages)
+            // Weekly BMI trend (exclude ≤5 years) — store by BMI category
+            if ((age ?? 0) > 5) {
               final weekStart = _weekStart(ts);
-              weekToBmis.putIfAbsent(weekStart, () => []).add(bmi);
+              final cat = bmi < 18.5
+                  ? 'underweight'
+                  : bmi < 25
+                      ? 'normal'
+                      : bmi < 30
+                          ? 'overweight'
+                          : 'obese';
+              weekToBmiCats.putIfAbsent(weekStart, () => {
+                    'underweight': 0,
+                    'normal': 0,
+                    'overweight': 0,
+                    'obese': 0,
+                  });
+              weekToBmiCats[weekStart]![cat] =
+                  (weekToBmiCats[weekStart]![cat] ?? 0) + 1;
+            }
             }
           }
 
@@ -1975,18 +1992,34 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
       }).toList();
 
       // Build weekly trends sorted by week start date
-      List<DateTime> weekKeys = weekToBmis.keys.toList()
+      List<DateTime> weekKeys = weekToBmiCats.keys.toList()
         ..sort((a, b) => a.compareTo(b));
       // Limit to last 12 weeks for readability
       if (weekKeys.length > 12) {
         weekKeys = weekKeys.sublist(weekKeys.length - 12);
       }
+      // Build cumulative weekly BMI distribution (total in records up to that week)
+      int cumUnder = 0, cumNormal = 0, cumOver = 0, cumObese = 0;
       final weeklyBmiTrend = weekKeys.map((wk) {
-        final bmis = weekToBmis[wk] ?? [];
-        final count = bmis.length;
+        final cats = weekToBmiCats[wk] ??
+            {
+              'underweight': 0,
+              'normal': 0,
+              'overweight': 0,
+              'obese': 0,
+            };
+        cumUnder += cats['underweight'] ?? 0;
+        cumNormal += cats['normal'] ?? 0;
+        cumOver += cats['overweight'] ?? 0;
+        cumObese += cats['obese'] ?? 0;
+        final total = cumUnder + cumNormal + cumOver + cumObese;
         return {
           'week': DateFormat('yyyy-MM-dd').format(wk),
-          'count': count,
+          'underweight': cumUnder,
+          'normal': cumNormal,
+          'overweight': cumOver,
+          'obese': cumObese,
+          'total': total,
         };
       }).toList();
 
@@ -2098,7 +2131,7 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
             Icon(Icons.timeline, color: Colors.lightBlueAccent, size: 20),
             SizedBox(width: 8),
             Text(
-              'Weekly Progress — BMI and Pediatric Z-scores',
+              'Weekly Progress',
               style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -2129,7 +2162,7 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
                         color: Colors.pinkAccent, size: 20),
                   ),
                   SizedBox(width: 12),
-                  Text('BMI Weekly Average',
+                  Text('BMI Weekly Growth',
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -2142,42 +2175,7 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
             ],
           ),
         ),
-        SizedBox(height: 16),
-        // Pediatric Z-score Weekly Chart
-        Container(
-          padding: EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.grey[900],
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey[800]!),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                        color: Colors.teal.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(8)),
-                    child: Icon(Icons.child_care,
-                        color: Colors.tealAccent, size: 20),
-                  ),
-                  SizedBox(width: 12),
-                  Text('Pediatric Z-scores Weekly (≤5 yrs)',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold)),
-                ],
-              ),
-              SizedBox(height: 16),
-              SizedBox(
-                  height: 260, child: _buildWeeklyZBarChart(analyticsData)),
-            ],
-          ),
-        ),
+
       ],
     );
   }
@@ -2191,10 +2189,19 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
               style: TextStyle(color: Colors.white70)));
     }
     final weeks = rows.map((e) => e['week'] as String).toList();
-    final values =
-        rows.map((e) => ((e['count'] as num?)?.toDouble() ?? 0.0)).toList();
+    final under =
+        rows.map((e) => ((e['underweight'] as num?)?.toDouble() ?? 0)).toList();
+    final normal =
+        rows.map((e) => ((e['normal'] as num?)?.toDouble() ?? 0)).toList();
+    final over =
+        rows.map((e) => ((e['overweight'] as num?)?.toDouble() ?? 0)).toList();
+    final obese =
+        rows.map((e) => ((e['obese'] as num?)?.toDouble() ?? 0)).toList();
+    final totals = rows
+        .map((e) => ((e['total'] as num?)?.toDouble() ?? 0))
+        .toList(growable: false);
 
-    final maxValue = values.fold<double>(0, (p, c) => c > p ? c : p);
+    final maxValue = totals.fold<double>(0, (p, c) => c > p ? c : p);
 
     return BarChart(
       BarChartData(
@@ -2205,7 +2212,7 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
             tooltipPadding: EdgeInsets.all(10),
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
               return BarTooltipItem(
-                '${weeks[groupIndex]}\n${rod.toY.toInt()} records',
+                '${weeks[groupIndex]}\nUnderweight: ${under[groupIndex].toInt()}\nNormal: ${normal[groupIndex].toInt()}\nOverweight: ${over[groupIndex].toInt()}\nObese: ${obese[groupIndex].toInt()}',
                 TextStyle(
                     color: Colors.white,
                     fontSize: 13,
@@ -2251,22 +2258,28 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
             drawVerticalLine: false,
             getDrawingHorizontalLine: (v) => FlLine(
                 color: Colors.grey[800]!.withOpacity(0.3), strokeWidth: 0.5)),
-        barGroups: List.generate(
-            values.length,
-            (i) => BarChartGroupData(x: i, barRods: [
-                  BarChartRodData(
-                    toY: values[i],
-                    width: 20,
-                    color: Colors.pinkAccent,
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(6),
-                        topRight: Radius.circular(6)),
-                    gradient: LinearGradient(colors: [
-                      Colors.pinkAccent.withOpacity(0.7),
-                      Colors.pinkAccent
-                    ], begin: Alignment.bottomCenter, end: Alignment.topCenter),
-                  )
-                ])),
+        barGroups: List.generate(weeks.length, (i) {
+          final uw = under[i];
+          final nm = normal[i];
+          final ov = over[i];
+          final ob = obese[i];
+          return BarChartGroupData(x: i, barRods: [
+            BarChartRodData(
+              toY: uw + nm + ov + ob,
+              width: 24,
+              color: Colors.transparent,
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(6), topRight: Radius.circular(6)),
+              rodStackItems: [
+                BarChartRodStackItem(0, uw, Colors.blue),
+                BarChartRodStackItem(uw, uw + nm, Colors.green),
+                BarChartRodStackItem(uw + nm, uw + nm + ov, Colors.orange),
+                BarChartRodStackItem(uw + nm + ov, uw + nm + ov + ob, Colors.red)
+              ],
+              gradient: null,
+            )
+          ]);
+        }),
       ),
     );
   }

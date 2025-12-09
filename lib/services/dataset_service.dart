@@ -1,8 +1,8 @@
-// ignore: unused_import
-import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 
 class PinggangPinoyData {
+  final String? id;
   final String ageGroup;
   final String sex;
   final String goFoods;
@@ -11,6 +11,7 @@ class PinggangPinoyData {
   final String glowFruits;
 
   PinggangPinoyData({
+    this.id,
     required this.ageGroup,
     required this.sex,
     required this.goFoods,
@@ -29,21 +30,50 @@ class PinggangPinoyData {
       'glowFruits': glowFruits,
     };
   }
+
+  factory PinggangPinoyData.fromJson(Map<String, dynamic> json, {String? id}) {
+    return PinggangPinoyData(
+      id: id,
+      ageGroup: (json['ageGroup'] ?? '').toString(),
+      sex: (json['sex'] ?? '').toString(),
+      goFoods: (json['goFoods'] ?? '').toString(),
+      growFoods: (json['growFoods'] ?? '').toString(),
+      glowVegetables: (json['glowVegetables'] ?? '').toString(),
+      glowFruits: (json['glowFruits'] ?? '').toString(),
+    );
+  }
 }
 
 class DatasetService {
   static List<PinggangPinoyData> _pinggangPinoyData = [];
   static bool _isLoaded = false;
+  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static const String _collectionName = 'pinggangPinoyDataset';
 
   /// Load the Pinggang Pinoy dataset from assets
   static Future<void> loadPinggangPinoyData() async {
     if (_isLoaded) return;
 
     try {
+      // Always start with the bundled base dataset
       final String data = await rootBundle.loadString('assets/datasets/pinggang_pinoy.txt');
-      _pinggangPinoyData = _parsePinggangPinoyData(data);
+      final List<PinggangPinoyData> baseData = _parsePinggangPinoyData(data);
+
+      // Then try to fetch any admin-added records from Firestore
+      List<PinggangPinoyData> mergedData = List.from(baseData);
+      try {
+        final remote = await _fetchRemoteDataset();
+        if (remote.isNotEmpty) {
+          mergedData = _mergeDataset(baseData, remote);
+          print('ℹ️ Loaded ${remote.length} admin-added dataset entries');
+        }
+      } catch (remoteError) {
+        print('⚠️ Unable to load remote dataset, using asset only: $remoteError');
+      }
+
+      _pinggangPinoyData = mergedData;
       _isLoaded = true;
-      print('✅ Pinggang Pinoy dataset loaded successfully: ${_pinggangPinoyData.length} age groups');
+      print('✅ Pinggang Pinoy dataset ready: ${_pinggangPinoyData.length} entries');
     } catch (e) {
       print('❌ Error loading Pinggang Pinoy dataset: $e');
       print('🔄 Using fallback dataset...');
@@ -89,6 +119,32 @@ class DatasetService {
     ];
     _isLoaded = true;
     print('✅ Fallback dataset loaded: ${_pinggangPinoyData.length} age groups');
+  }
+
+  static Future<List<PinggangPinoyData>> _fetchRemoteDataset() async {
+    final snapshot = await _firestore.collection(_collectionName).get();
+    return snapshot.docs
+        .map((doc) => PinggangPinoyData.fromJson(doc.data(), id: doc.id))
+        .toList();
+  }
+
+  static List<PinggangPinoyData> _mergeDataset(
+    List<PinggangPinoyData> base,
+    List<PinggangPinoyData> remote,
+  ) {
+    final Map<String, PinggangPinoyData> merged = {};
+    for (final item in base) {
+      merged[_makeKey(item)] = item;
+    }
+    for (final item in remote) {
+      // Admin-added data overrides bundled defaults for the same age group/sex
+      merged[_makeKey(item)] = item;
+    }
+    return merged.values.toList();
+  }
+
+  static String _makeKey(PinggangPinoyData data) {
+    return '${data.ageGroup.toLowerCase().trim()}|${data.sex.toLowerCase().trim()}';
   }
 
   /// Parse the raw dataset text into structured data
@@ -242,5 +298,40 @@ class DatasetService {
   /// Get available sexes in the dataset
   static List<String> getSexes() {
     return _pinggangPinoyData.map((data) => data.sex).toSet().toList();
+  }
+
+  /// Add a new dataset entry (admin)
+  static Future<void> addPinggangPinoyEntry(
+    PinggangPinoyData data, {
+    String? createdBy,
+  }) async {
+    await _firestore.collection(_collectionName).add({
+      ...data.toJson(),
+      'createdAt': FieldValue.serverTimestamp(),
+      if (createdBy != null) 'createdBy': createdBy,
+    });
+
+    // Ensure subsequent AI calls use the fresh dataset
+    await refreshDataset();
+  }
+
+  /// Stream admin-added dataset entries from Firestore
+  static Stream<List<PinggangPinoyData>> streamRemoteDataset() {
+    return _firestore
+        .collection(_collectionName)
+        .orderBy('ageGroup')
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => PinggangPinoyData.fromJson(doc.data(), id: doc.id))
+              .toList(),
+        );
+  }
+
+  /// Force a reload of the dataset (asset + remote)
+  static Future<void> refreshDataset() async {
+    _isLoaded = false;
+    _pinggangPinoyData = [];
+    await loadPinggangPinoyData();
   }
 }

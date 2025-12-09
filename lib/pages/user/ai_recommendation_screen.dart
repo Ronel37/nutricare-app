@@ -16,6 +16,8 @@ class _AIRecommendationScreenState extends State<AIRecommendationScreen> {
       TextEditingController();
   final TextEditingController _healthGoalsController = TextEditingController();
   final TextEditingController _foodItemController = TextEditingController();
+  static const String _defaultGeminiApiKey =
+      'AIzaSyD_b1lb1R3oKY_pHGy0PZWloE9Yjf8gBO0';
 
   String _selectedAgeGroup = '19-59 years (Adults) - Male';
   String _selectedSex = 'Male';
@@ -65,17 +67,14 @@ class _AIRecommendationScreenState extends State<AIRecommendationScreen> {
   }
 
   Future<void> _autoSetupAPIKey() async {
-    // Auto-setup the API key if not already set
-    if (!_hasApiKey) {
-      try {
-        await GeminiService.setApiKey(
-            'AIzaSyBKuk_SL9FBGU2n4Jx3T9BAGHS3A5xxlKQ');
-        setState(() {
-          _hasApiKey = true;
-        });
-      } catch (e) {
-        print('Auto-setup failed: $e');
-      }
+    // Auto-setup the API key on launch to ensure the latest key is in use
+    try {
+      await GeminiService.setApiKey(_defaultGeminiApiKey);
+      setState(() {
+        _hasApiKey = true;
+      });
+    } catch (e) {
+      print('Auto-setup failed: $e');
     }
   }
 

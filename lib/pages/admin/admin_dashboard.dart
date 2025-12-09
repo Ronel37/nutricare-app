@@ -8,6 +8,7 @@ import 'package:nutricare_app/pages/admin/add_recipe.dart';
 import 'package:nutricare_app/pages/admin/admin_feedb.dart';
 import 'package:nutricare_app/pages/admin/analysis.dart';
 import 'package:nutricare_app/pages/admin/help.dart';
+import 'package:nutricare_app/pages/admin/manage_dataset.dart';
 import 'package:nutricare_app/pages/admin/trail.dart';
 import 'package:nutricare_app/pages/admin/view_persons2.dart';
 import 'package:nutricare_app/pages/admin/user_updates_page.dart';
@@ -218,6 +219,24 @@ class DashboardContent extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => AddRecipePage()),
+                  );
+                },
+              ),
+              _buildDashboardCard(
+                context: context,
+                title: 'AI Dataset',
+                description: 'Add new Pinggang Pinoy data for AI use',
+                icon: Icons.dataset,
+                iconColor: Colors.lightBlueAccent,
+                onTap: () async {
+                  await _notifyUsers(
+                    context,
+                    'AI Dataset Updated',
+                    'Admin has updated nutrition dataset for recommendations.'
+                  );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ManageDatasetPage()),
                   );
                 },
               ),
