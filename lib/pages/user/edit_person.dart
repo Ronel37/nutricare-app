@@ -13,6 +13,7 @@ class EditPerson extends StatefulWidget {
   final String bmiCategory;
   final double height;
   final double weight;
+  final String address;
 
   const EditPerson({
     required this.documentId,
@@ -23,6 +24,7 @@ class EditPerson extends StatefulWidget {
     required this.bmiCategory,
     required this.height,
     required this.weight,
+    required this.address,
     super.key,
   });
 
@@ -37,6 +39,7 @@ class _EditPersonState extends State<EditPerson> {
   late TextEditingController ageController;
   late TextEditingController heightController;
   late TextEditingController weightController;
+  late TextEditingController addressController;
 
   Color _getBmiColor() {
     switch (widget.bmiCategory) {
@@ -62,6 +65,7 @@ class _EditPersonState extends State<EditPerson> {
     ageController = TextEditingController(text: widget.age.toString());
     heightController = TextEditingController(text: widget.height.toString());
     weightController = TextEditingController(text: widget.weight.toString());
+    addressController = TextEditingController(text: widget.address);
   }
 
   @override
@@ -71,6 +75,7 @@ class _EditPersonState extends State<EditPerson> {
     ageController.dispose();
     heightController.dispose();
     weightController.dispose();
+    addressController.dispose();
     super.dispose();
   }
 
@@ -127,6 +132,7 @@ class _EditPersonState extends State<EditPerson> {
       final age = int.parse(ageController.text.trim());
       final height = double.parse(heightController.text.trim());
       final weight = double.parse(weightController.text.trim());
+      final address = addressController.text.trim();
 
       final bmi = weight / (height * height);
 
@@ -166,6 +172,7 @@ class _EditPersonState extends State<EditPerson> {
           age: age,
           weight: weight,
           height: height,
+          address: address,
           haz: haz,
           waz: waz,
           whz: whz,
@@ -180,6 +187,7 @@ class _EditPersonState extends State<EditPerson> {
           'bmiCategory': bmiCategory,
           'height': height,
           'weight': weight,
+          'address': address,
         };
 
         // Add anthropometric data for children <= 5 years
@@ -359,6 +367,27 @@ class _EditPersonState extends State<EditPerson> {
                         final age = int.tryParse(value);
                         if (age == null || age <= 0) {
                           return 'Please enter a valid age';
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 25),
+                    const Text(
+                      'Address',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _buildInputField(
+                      controller: addressController,
+                      hintText: 'Enter address',
+                      icon: Icons.location_on,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please enter an address';
                         }
                         return null;
                       },

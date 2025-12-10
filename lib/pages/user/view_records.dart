@@ -908,6 +908,7 @@ class _ViewPersonsState extends State<ViewPersons> {
                                                                       weight: person[
                                                                               'weight'] ??
                                                                           0.0,
+                                                                      address: person['address'] ?? '',
                                                                     ),
                                                                   ),
                                                                 );

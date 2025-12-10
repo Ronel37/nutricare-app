@@ -30,6 +30,7 @@ class _AddPersonState extends State<AddPerson> {
   final TextEditingController ageController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
+  final TextEditingController addressController = TextEditingController();
   final TextEditingController dietaryPreferenceController = TextEditingController();
   final TextEditingController healthGoalsController = TextEditingController();
   final String userId = FirebaseAuth.instance.currentUser!.uid;
@@ -85,6 +86,7 @@ class _AddPersonState extends State<AddPerson> {
       ageController.clear();
       heightController.clear();
       weightController.clear();
+      addressController.clear();
       dietaryPreferenceController.clear();
       healthGoalsController.clear();
       _imageFile = null;
@@ -232,6 +234,13 @@ class _AddPersonState extends State<AddPerson> {
                       icon: Icons.cake,
                       type: TextInputType.number,
                     ),
+                    const SizedBox(height: 16),
+                    _buildInputField(
+                      controller: addressController,
+                      hintText: 'Enter address',
+                      icon: Icons.location_on,
+                      type: TextInputType.streetAddress,
+                    ),
                     const SizedBox(height: 25),
                     const Text(
                       'Body Measurements',
@@ -312,6 +321,7 @@ class _AddPersonState extends State<AddPerson> {
                                 double.tryParse(heightController.text.trim());
                             final weight =
                                 double.tryParse(weightController.text.trim());
+                            final address = addressController.text.trim();
                             final dietaryPreference = dietaryPreferenceController.text.trim();
                             final healthGoals = healthGoalsController.text.trim();
 
@@ -359,6 +369,7 @@ class _AddPersonState extends State<AddPerson> {
                               'bmi': bmi,
                               'bmiCategory': bmiCategory,
                               'profilePic': imageUrl,
+                              'address': address,
                               'sex': _selectedSex,
                               'dietaryPreference': _selectedDietaryPreference,
                               'healthGoal': _selectedHealthGoal,

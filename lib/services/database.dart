@@ -347,6 +347,7 @@ class AuthServices {
     required int age,
     required double weight,
     required double height,
+    String? address,
     double? haz,
     double? waz,
     double? whz,
@@ -363,6 +364,7 @@ class AuthServices {
         'age': age,
         'weight': weight,
         'height': height,
+        'address': address,
         'bmi': bmi,
         'bmiCategory': _getBmiCategory(bmi),
         'createdAt': FieldValue.serverTimestamp(),
@@ -429,6 +431,7 @@ class AuthServices {
     int? age,
     double? weight,
     double? height,
+    String? address,
     double? haz,
     double? waz,
     double? whz,
@@ -487,6 +490,12 @@ class AuthServices {
         historyData['age'] = age;
         oldValues['age'] = personData['age'];
         changedFields['age'] = age;
+      }
+      if (address != null && address != (personData['address'] ?? '')) {
+        updates['address'] = address;
+        historyData['address'] = address;
+        oldValues['address'] = personData['address'];
+        changedFields['address'] = address;
       }
       if (weight != null) {
         updates['weight'] = weight;

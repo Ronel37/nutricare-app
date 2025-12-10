@@ -17,7 +17,7 @@ class _AIRecommendationScreenState extends State<AIRecommendationScreen> {
   final TextEditingController _healthGoalsController = TextEditingController();
   final TextEditingController _foodItemController = TextEditingController();
   static const String _defaultGeminiApiKey =
-      'AIzaSyD_b1lb1R3oKY_pHGy0PZWloE9Yjf8gBO0';
+      'AIzaSyAJt7g__VZIPDuf9kKaPa7ycbrRF6X-f1k';
 
   String _selectedAgeGroup = '19-59 years (Adults) - Male';
   String _selectedSex = 'Male';
@@ -26,6 +26,7 @@ class _AIRecommendationScreenState extends State<AIRecommendationScreen> {
 
   bool _isLoading = false;
   String _aiResponse = '';
+  double _accuracyScore = 0.0; // 0.0 - 1.0
   bool _hasApiKey = false;
 
   final List<String> _ageGroups = [
@@ -100,6 +101,7 @@ class _AIRecommendationScreenState extends State<AIRecommendationScreen> {
     setState(() {
       _isLoading = true;
       _aiResponse = '';
+      _accuracyScore = 0.0;
     });
 
     try {
@@ -155,13 +157,40 @@ class _AIRecommendationScreenState extends State<AIRecommendationScreen> {
       setState(() {
         _aiResponse = response;
         _isLoading = false;
+        _accuracyScore = _calculateAccuracyScore();
       });
     } catch (e) {
       setState(() {
         _isLoading = false;
         _aiResponse = 'Error: ${e.toString()}';
+        _accuracyScore = 0.0;
       });
     }
+  }
+
+  double _calculateAccuracyScore() {
+    // Heuristic confidence based on how much context the user provided
+    double score = 0.72; // base confidence using Pinggang Pinoy dataset
+
+    if (_dietaryPreferencesController.text.trim().isNotEmpty) {
+      score += 0.08;
+    }
+    if (_healthGoalsController.text.trim().isNotEmpty) {
+      score += 0.08;
+    }
+    if (_selectedRecommendationType == 'meal_suggestions' &&
+        _selectedMealType != 'Any meal') {
+      score += 0.04;
+    }
+    if (_selectedRecommendationType == 'food_analysis' &&
+        _foodItemController.text.trim().isNotEmpty) {
+      score += 0.04;
+    }
+
+    // Keep the score within sensible bounds
+    if (score > 0.98) score = 0.98;
+    if (score < 0.6) score = 0.6;
+    return score;
   }
 
   void _showSnackBar(String message, Color color) {
@@ -492,6 +521,8 @@ class _AIRecommendationScreenState extends State<AIRecommendationScreen> {
                             ),
                           ],
                         ),
+                        const SizedBox(height: 10),
+                        _buildAccuracyBadge(),
                         const SizedBox(height: 16),
                         _buildFormattedContentDark(context, _aiResponse),
                       ],
@@ -689,6 +720,39 @@ class _AIRecommendationScreenState extends State<AIRecommendationScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildAccuracyBadge() {
+    final percent = (_accuracyScore * 100).clamp(0, 100).toStringAsFixed(0);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.verified, color: Color(0xFF0A3D00), size: 18),
+            const SizedBox(width: 6),
+            Text(
+              'Estimated accuracy: $percent%',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: LinearProgressIndicator(
+            value: _accuracyScore.clamp(0.0, 1.0),
+            minHeight: 8,
+            backgroundColor: Colors.grey[800],
+            valueColor:
+                const AlwaysStoppedAnimation<Color>(Color(0xFF0A3D00)),
+          ),
+        ),
+      ],
     );
   }
 

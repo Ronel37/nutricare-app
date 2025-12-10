@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -24,6 +25,9 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
   String _selectedChartType = 'bmi';
   String _filterAgeGroup = 'all'; // all, children, adults
   String _filterSex = 'all'; // all, male, female
+  String _filterAddress = 'all'; // all or specific address
+  List<String> _addressOptions = ['all'];
+  final TextEditingController _addressSearchController = TextEditingController();
 
   @override
   void initState() {
@@ -45,6 +49,7 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
   @override
   void dispose() {
     _animationController.dispose();
+    _addressSearchController.dispose();
     super.dispose();
   }
 
@@ -111,6 +116,10 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
           SizedBox(width: 8),
           _buildSexFilter(),
           SizedBox(width: 8),
+          _buildAddressFilter(),
+          SizedBox(width: 4),
+          _buildAddressSearchButton(),
+          SizedBox(width: 8),
           _buildExportButton(),
           SizedBox(width: 16),
         ],
@@ -159,6 +168,8 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
                     }
 
                     final analyticsData = analyticsSnapshot.data ?? {};
+                    _syncAddressOptions(
+                        (analyticsData['addresses'] as List<dynamic>? ?? []));
                     return _buildProfessionalDashboard(analyticsData);
                   },
                 );
@@ -278,6 +289,233 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
     );
   }
 
+  Widget _buildAddressFilter() {
+    final items = _addressOptions.map((address) {
+      final label = address == 'all' ? 'All Addresses' : address;
+      return DropdownMenuItem(
+        value: address,
+        child: Text(
+          label,
+          overflow: TextOverflow.ellipsis,
+        ),
+      );
+    }).toList();
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey[900],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[700]!),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _filterAddress,
+          dropdownColor: Colors.grey[900],
+          style: TextStyle(color: Colors.white, fontSize: 12),
+          items: items,
+          onChanged: (value) {
+            if (value == null) return;
+            setState(() {
+              _filterAddress = value;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAddressSearchButton() {
+    return Tooltip(
+      message: 'Search address',
+      child: Container(
+        height: 44,
+        decoration: BoxDecoration(
+          color: Colors.grey[900],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey[700]!),
+        ),
+        child: IconButton(
+          icon: const Icon(Icons.search, color: Colors.white, size: 20),
+          onPressed: _showAddressSearchSheet,
+        ),
+      ),
+    );
+  }
+
+  void _showAddressSearchSheet() {
+    final options = List<String>.from(_addressOptions)..remove('all');
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        List<String> filtered = List<String>.from(options);
+        _addressSearchController.clear();
+
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            void applyFilter(String query) {
+              final q = query.toLowerCase();
+              filtered = options
+                  .where((a) => a.toLowerCase().contains(q))
+                  .toList(growable: false);
+              setModalState(() {});
+            }
+
+            return FractionallySizedBox(
+              heightFactor: 0.65,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[950],
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                  border: Border.all(color: Colors.white10, width: 0.7),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.6),
+                      blurRadius: 16,
+                      offset: const Offset(0, -4),
+                    )
+                  ],
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Search Address',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    _filterAddress = 'all';
+                                  });
+                                },
+                                child: const Text(
+                                  'Clear',
+                                  style: TextStyle(color: Colors.lightBlueAccent),
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.close, color: Colors.white70),
+                                onPressed: () => Navigator.pop(context),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _addressSearchController,
+                        onChanged: applyFilter,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          hintText: 'Type to search address',
+                          hintStyle: const TextStyle(color: Colors.white70),
+                          prefixIcon: const Icon(Icons.search, color: Colors.white70),
+                          filled: true,
+                          fillColor: Colors.grey[900],
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.4),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.white10),
+                          ),
+                          child: filtered.isEmpty
+                              ? const Center(
+                                  child: Text(
+                                    'No matching addresses',
+                                    style: TextStyle(color: Colors.white70),
+                                  ),
+                                )
+                              : ListView.separated(
+                                  itemCount: filtered.length,
+                                  separatorBuilder: (_, __) => const Divider(
+                                    color: Colors.white12,
+                                    height: 1,
+                                  ),
+                                  itemBuilder: (_, i) {
+                                    final addr = filtered[i];
+                                    return ListTile(
+                                      dense: true,
+                                      visualDensity: VisualDensity.compact,
+                                      title: Text(
+                                        addr,
+                                        style: const TextStyle(
+                                            color: Colors.white, fontSize: 14),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                        setState(() {
+                                          _filterAddress = addr;
+                                        });
+                                      },
+                                    );
+                                  },
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _syncAddressOptions(List<dynamic> addresses) {
+    final normalized = addresses
+        .map((e) => e.toString().trim())
+        .where((e) => e.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+
+    final current = _addressOptions
+        .where((a) => a != 'all')
+        .map((a) => a.toLowerCase())
+        .toSet();
+    final incoming = normalized.map((a) => a.toLowerCase()).toSet();
+
+    if (!setEquals(current, incoming)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() {
+          _addressOptions = ['all', ...normalized];
+          if (!_addressOptions.contains(_filterAddress)) {
+            _filterAddress = 'all';
+          }
+        });
+      });
+    }
+  }
+
   Widget _buildExportButton() {
     return Container(
       decoration: BoxDecoration(
@@ -386,6 +624,8 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
           _buildDashboardHeader(analyticsData),
           SizedBox(height: 32),
           _buildStatsOverview(analyticsData),
+          SizedBox(height: 24),
+          _buildMonthlyBmiCategoryCard(analyticsData),
           SizedBox(height: 32),
           _buildMalnutritionOverview(analyticsData),
           SizedBox(height: 32),
@@ -652,6 +892,275 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMonthlyBmiCategoryCard(Map<String, dynamic> analyticsData) {
+    final List<dynamic> rows =
+        (analyticsData['monthlyBmiCategoryTrend'] as List<dynamic>? ?? []);
+    if (rows.isEmpty) {
+      return Container(
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey[900],
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.grey[800]!),
+        ),
+        child: Center(
+          child: Text('No monthly BMI category data',
+              style: TextStyle(color: Colors.white70)),
+        ),
+      );
+    }
+
+    final months = rows.map((e) => e['month'] as String).toList();
+    final under = rows
+        .map((e) => ((e['underweight'] as num?)?.toDouble() ?? 0))
+        .toList();
+    final normal =
+        rows.map((e) => ((e['normal'] as num?)?.toDouble() ?? 0)).toList();
+    final over =
+        rows.map((e) => ((e['overweight'] as num?)?.toDouble() ?? 0)).toList();
+    final obese =
+        rows.map((e) => ((e['obese'] as num?)?.toDouble() ?? 0)).toList();
+    final totals =
+        rows.map((e) => ((e['total'] as num?)?.toDouble() ?? 0)).toList();
+    final double maxValue = totals
+        .fold<double>(0, (p, c) => c > p ? c : p)
+        .clamp(0, double.infinity)
+        .toDouble();
+
+    final current = rows.last;
+    Map<String, dynamic> currentRates =
+        (current['rates'] as Map<String, dynamic>? ?? {});
+
+    return Container(
+      padding: EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.grey[900],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey[800]!),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.deepPurple.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(Icons.bar_chart, color: Colors.deepPurple, size: 18),
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Monthly BMI Category Trend',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16)),
+                    Text('Quick view of category rates by month',
+                        style: TextStyle(color: Colors.white70, fontSize: 12)),
+                  ],
+                ),
+              ),
+              if (months.isNotEmpty)
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white10,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    _formatMonthLabel(months.last),
+                    style: TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                ),
+            ],
+          ),
+          SizedBox(height: 12),
+          if (currentRates.isNotEmpty)
+            Wrap(
+              spacing: 12,
+              runSpacing: 8,
+              children: [
+                _rateChip('Underweight',
+                    currentRates['underweight']?.toDouble() ?? 0, Colors.blue),
+                _rateChip(
+                    'Normal', currentRates['normal']?.toDouble() ?? 0, Colors.green),
+                _rateChip('Overweight',
+                    currentRates['overweight']?.toDouble() ?? 0, Colors.orange),
+                _rateChip(
+                    'Obese', currentRates['obese']?.toDouble() ?? 0, Colors.red),
+              ],
+            ),
+          SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              _smallCategoryChart(
+                  'Underweight', months, under, Colors.blue, maxValue),
+              _smallCategoryChart('Normal', months, normal, Colors.green, maxValue),
+              _smallCategoryChart(
+                  'Overweight', months, over, Colors.orange, maxValue),
+              _smallCategoryChart('Obese', months, obese, Colors.red, maxValue),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _rateChip(String label, double value, Color color) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.4)),
+      ),
+      child: Text(
+        '$label ${value.toStringAsFixed(1)}%',
+        style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+
+  String _formatMonthLabel(String month) {
+    try {
+      final date = DateFormat('MMMM yyyy').parse(month);
+      return DateFormat('MMM').format(date);
+    } catch (_) {
+      return month;
+    }
+  }
+
+  Widget _smallCategoryChart(String label, List<String> months,
+      List<double> values, Color color, double globalMax) {
+    final double localMax = values.fold<double>(0, (p, c) => c > p ? c : p);
+    final double maxY = (localMax <= 0 ? 10 : localMax * 1.2)
+        .clamp(0, globalMax > 0 ? globalMax * 1.2 : double.infinity)
+        .toDouble();
+    return SizedBox(
+      width: 220,
+      child: Container(
+        padding: EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white10,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                ),
+                SizedBox(width: 8),
+                Text(label,
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12)),
+              ],
+            ),
+            SizedBox(height: 8),
+            SizedBox(
+              height: 140,
+              child: months.isEmpty
+                  ? Center(
+                      child: Text('No data',
+                          style: TextStyle(color: Colors.white70, fontSize: 11)),
+                    )
+                  : BarChart(
+                      BarChartData(
+                        maxY: (maxY <= 0 ? 10 : maxY * 1.2),
+                        barTouchData: BarTouchData(
+                          touchTooltipData: BarTouchTooltipData(
+                            tooltipRoundedRadius: 6,
+                            tooltipPadding: EdgeInsets.all(8),
+                            getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                              return BarTooltipItem(
+                                '${_formatMonthLabel(months[groupIndex])}: ${values[groupIndex].toInt()}',
+                                TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600),
+                              );
+                            },
+                          ),
+                        ),
+                        titlesData: FlTitlesData(
+                          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                          leftTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 26,
+                              getTitlesWidget: (v, _) => Text(
+                                v.toInt().toString(),
+                                style: TextStyle(color: Colors.white60, fontSize: 10),
+                              ),
+                            ),
+                          ),
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 34,
+                              getTitlesWidget: (v, _) {
+                                final idx = v.toInt();
+                                if (idx >= 0 && idx < months.length) {
+                                  return Transform.rotate(
+                                    angle: -0.6,
+                                    child: Text(
+                                      _formatMonthLabel(months[idx]),
+                                      style:
+                                          TextStyle(color: Colors.white70, fontSize: 10),
+                                    ),
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                            ),
+                          ),
+                        ),
+                        gridData: FlGridData(show: false),
+                        borderData: FlBorderData(show: false),
+                        barGroups: List.generate(months.length, (i) {
+                          return BarChartGroupData(
+                            x: i,
+                            barRods: [
+                              BarChartRodData(
+                                toY: values[i],
+                                width: 12,
+                                color: color,
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(6),
+                                  topRight: Radius.circular(6),
+                                ),
+                                gradient: LinearGradient(
+                                  colors: [color.withOpacity(0.6), color],
+                                  begin: Alignment.bottomCenter,
+                                  end: Alignment.topCenter,
+                                ),
+                              ),
+                            ],
+                          );
+                        }),
+                      ),
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1698,6 +2207,7 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
         'children': 0,
         'adults': 0,
       };
+      Set<String> addresses = {};
       List<double> heights = [];
       List<double> weights = [];
       // malnutrition stats for children only (≤5 years)
@@ -1706,6 +2216,7 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
       Map<String, int> whzStats = {'severe': 0, 'moderate': 0, 'normal': 0};
       // monthly BMI trend
       Map<String, List<double>> monthToBmis = {};
+      Map<String, Map<String, int>> monthToBmiCats = {};
       // weekly trends
       Map<DateTime, Map<String, int>> weekToBmiCats = {};
       Map<DateTime, List<double>> weekToHaz = {};
@@ -1730,8 +2241,6 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
           await Future.wait(personFutures);
 
       for (final personSnapshot in personSnapshots) {
-        totalPersons += personSnapshot.docs.length;
-
         for (var personDoc in personSnapshot.docs) {
           final person = personDoc.data() as Map<String, dynamic>;
           final dynamic bmiRaw = person['bmi'];
@@ -1743,6 +2252,10 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
           final double? waz = _toDouble(person['waz']);
           final double? whz = _toDouble(person['whz']);
           final String? sexVal = (person['sex'] as String?)?.toLowerCase();
+          final String address = (person['address'] ?? '').toString().trim();
+          if (address.isNotEmpty) {
+            addresses.add(address);
+          }
           final String first = (person['firstname'] ?? '').toString();
           final String last = (person['lastname'] ?? '').toString();
           final String name = (first + ' ' + last).trim().isEmpty
@@ -1759,9 +2272,14 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
               (_filterAgeGroup == 'children'
                   ? (age ?? 99) <= 5
                   : (age ?? 0) > 5);
-          if (!passesSex || !passesAge) {
+          bool passesAddress = _filterAddress == 'all' ||
+              (address.isNotEmpty &&
+                  address.toLowerCase() == _filterAddress.toLowerCase());
+          if (!passesSex || !passesAge || !passesAddress) {
             continue;
           }
+
+          totalPersons++;
 
           if (bmi != null) {
             // Exclude BMI of 5 years old and below from category distribution
@@ -1820,25 +2338,35 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
             if (ts != null) {
               final monthKey = DateFormat('MMMM yyyy').format(ts);
               monthToBmis.putIfAbsent(monthKey, () => []).add(bmi);
-            // Weekly BMI trend (exclude ≤5 years) — store by BMI category
-            if ((age ?? 0) > 5) {
-              final weekStart = _weekStart(ts);
-              final cat = bmi < 18.5
-                  ? 'underweight'
-                  : bmi < 25
-                      ? 'normal'
-                      : bmi < 30
-                          ? 'overweight'
-                          : 'obese';
-              weekToBmiCats.putIfAbsent(weekStart, () => {
-                    'underweight': 0,
-                    'normal': 0,
-                    'overweight': 0,
-                    'obese': 0,
-                  });
-              weekToBmiCats[weekStart]![cat] =
-                  (weekToBmiCats[weekStart]![cat] ?? 0) + 1;
-            }
+              // Monthly BMI categories (exclude ≤5 years)
+              if ((age ?? 0) > 5) {
+                final cat = bmi < 18.5
+                    ? 'underweight'
+                    : bmi < 25
+                        ? 'normal'
+                        : bmi < 30
+                            ? 'overweight'
+                            : 'obese';
+                monthToBmiCats.putIfAbsent(monthKey, () => {
+                      'underweight': 0,
+                      'normal': 0,
+                      'overweight': 0,
+                      'obese': 0,
+                    });
+                monthToBmiCats[monthKey]![cat] =
+                    (monthToBmiCats[monthKey]![cat] ?? 0) + 1;
+
+                // Weekly BMI trend (exclude ≤5 years) — store by BMI category
+                final weekStart = _weekStart(ts);
+                weekToBmiCats.putIfAbsent(weekStart, () => {
+                      'underweight': 0,
+                      'normal': 0,
+                      'overweight': 0,
+                      'obese': 0,
+                    });
+                weekToBmiCats[weekStart]![cat] =
+                    (weekToBmiCats[weekStart]![cat] ?? 0) + 1;
+              }
             }
           }
 
@@ -1980,15 +2508,44 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
         }
       }
 
-      // Sort monthly trend chronologically
-      final months = monthToBmis.keys.toList()
+      // Sort monthly trend chronologically (union of BMI averages and categories)
+      final monthSet = <String>{...monthToBmis.keys, ...monthToBmiCats.keys};
+      final months = monthSet.toList()
         ..sort((a, b) => DateFormat('MMMM yyyy')
             .parse(a)
             .compareTo(DateFormat('MMMM yyyy').parse(b)));
       final monthlyTrend = months.map((m) {
-        final list = monthToBmis[m]!;
+        final list = monthToBmis[m] ?? [];
+        if (list.isEmpty) return {'month': m, 'avgBmi': 0};
         final avg = list.reduce((a, b) => a + b) / list.length;
         return {'month': m, 'avgBmi': avg};
+      }).toList();
+
+      final monthlyCategoryTrend = months.map((m) {
+        final cats = monthToBmiCats[m] ??
+            {
+              'underweight': 0,
+              'normal': 0,
+              'overweight': 0,
+              'obese': 0,
+            };
+        final total = cats.values.fold<int>(0, (p, c) => p + c);
+        double rate(String key) =>
+            total > 0 ? (cats[key] ?? 0) * 100 / total : 0;
+        return {
+          'month': m,
+          'underweight': cats['underweight'] ?? 0,
+          'normal': cats['normal'] ?? 0,
+          'overweight': cats['overweight'] ?? 0,
+          'obese': cats['obese'] ?? 0,
+          'total': total,
+          'rates': {
+            'underweight': rate('underweight'),
+            'normal': rate('normal'),
+            'overweight': rate('overweight'),
+            'obese': rate('obese'),
+          }
+        };
       }).toList();
 
       // Build weekly trends sorted by week start date
@@ -2083,6 +2640,9 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
       // Limit to top 5 for lightweight display
       if (atRisk.length > 5) atRisk = atRisk.sublist(0, 5);
 
+      final addressesList = addresses.toList()
+        ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+
       return {
         'totalUsers': totalUsers,
         'totalPersons': totalPersons,
@@ -2102,11 +2662,13 @@ class _MonthlyBmiProgressPageState extends State<MonthlyBmiProgressPage>
           'whz': whzStats,
         },
         'monthlyBmiTrend': monthlyTrend,
+        'monthlyBmiCategoryTrend': monthlyCategoryTrend,
         'weeklyBmiTrend': weeklyBmiTrend,
         'weeklyPediatricZTrends': weeklyPediatricZTrends,
         'atRisk': atRisk,
         'allAtRisk':
             allAtRisk, // Store all at-risk individuals for "View All" functionality
+        'addresses': addressesList,
       };
     } catch (e) {
       print('Error fetching overall analytics: $e');
